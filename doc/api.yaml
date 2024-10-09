@@ -6,6 +6,7 @@ info:
     This OpenAPI document describes the WasaPhoto project REST API.
 
     WasaPhoto is a social media platform that focuses on photo sharing.
+
   version: 1.0.0
 
 servers:
@@ -76,7 +77,7 @@ paths:
       parameters: { $ref: "#/components/parameters/UsernameQuery" }
       responses:
         "200":
-          description: 
+          description: Returns the list of users according to the search criteria
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UserList" }
@@ -95,7 +96,7 @@ paths:
       parameters: { $ref: "#/components/parameters/UserId" }
       responses:
         "200":
-          description: 
+          description: Returns the User profile
           content:
             application/json:
               schema: { $ref: "#/components/schemas/User" }
@@ -115,7 +116,8 @@ paths:
       parameters: {$ref: "#/components/parameters/Stream"}
       responses:
         "200":
-          description:
+          description: Returns the user stream
+          content:
             application/json:
               schema: { $ref: "#/components/schemas/Stream" }
         "400": { $ref: "#/components/responses/BadRequest"}
@@ -214,7 +216,8 @@ paths:
       parameters: { $ref: "#/components/parameters/PostId"}
       responses:
         "201":
-          description:
+          description: Comment created
+          content:
             application/json:
               schema: { $ref: "#/components/schemas/Comment" }
         "400": { $ref: "#/components/responses/BadRequest"}
@@ -230,7 +233,8 @@ paths:
       parameters: { $ref: "#/components/parameters/PostId"}
       responses:
         "200":
-          description:
+          description: Returns the list of comment related to the requested post.
+          content:
             application/json:
               schema: { $ref: "#/components/schemas/CommentList" }
         "400": { $ref: "#/components/responses/BadRequest"}
@@ -287,7 +291,7 @@ paths:
         Gets the list of blocked users.
       responses:
         "200": 
-          description:
+          description: Returns the list of the blocked users.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UserList" }
@@ -330,7 +334,7 @@ paths:
         Gets the list of followers.
       responses:
         "200": 
-          description:
+          description: Returns the list of the users that follows the logged user.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UserList" }
@@ -345,7 +349,7 @@ paths:
         Gets the list of following.
       responses:
         "200": 
-          description:
+          description: Returns the list of the users that the logged user follows.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UserList" }
