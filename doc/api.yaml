@@ -14,7 +14,7 @@ servers:
     description: localhost server for development
 
 security:
-  - bearerAuth: []
+  - bearerAuthentication: []
 
 tags:
   - name: session
@@ -74,7 +74,8 @@ paths:
       description: |-
         Search the users in the database. 
         If a user has blocked the requested user, it will not be displayed.
-      parameters: { $ref: "#/components/parameters/UsernameQuery" }
+      parameters: 
+        - $ref: "#/components/parameters/UsernameQuery" 
       responses:
         "200":
           description: Returns the list of users according to the search criteria
@@ -93,7 +94,7 @@ paths:
       description: |-
         Returns the full profile of the requested user.
         If a user has blocked the requested user, it will not be displayed.
-      parameters: { $ref: "#/components/parameters/UserId" }
+      parameters: [ $ref: "#/components/parameters/UserId" ]
       responses:
         "200":
           description: Returns the User profile
@@ -113,7 +114,8 @@ paths:
       summary: Get the stream of posts on a page.
       description: |-
         Get the stream of posts on a page.
-      parameters: {$ref: "#/components/parameters/Stream"}
+      parameters: 
+        - $ref: "#/components/parameters/UserId"
       responses:
         "200":
           description: Returns the user stream
@@ -123,20 +125,30 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest"}
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": {$ref: "#/components/responses/InternalServerError"}
-      
+        
   /settings/username:
-    tags: ["settings"]
-    operationId: setMyUserName
-    summary: Update current username
-    description: |-
-      Update or set a new username
-    parameters: { $ref: "#/components/parameters/UsernameQuery" }
-    responses:
-      "204": { $ref: "#/components/responses/NoContent" }
-      "400": { $ref: "#/components/responses/BadRequest" }
-      "401": { $ref: "#/components/responses/Unauthorized" }
-      "403": { $ref: "#/components/responses/Forbidden" }
-      "500": { $ref: "#/components/responses/InternalServerError" }
+    put:
+      tags: ["settings"]
+      operationId: setMyUserName
+      summary: Update current username
+      description: |-
+        Update or set a new username
+      requestBody:
+        description: Fields to update in the current user's resource
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Username" }
+      responses:
+        "200": 
+          description: username modified.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserReduced" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /posts:
     post:
@@ -172,7 +184,8 @@ paths:
       summary: Remove a post.
       description: |-
         Remove a post.
-      parameters: { $ref: "#/components/parameters/PostId"}
+      parameters: 
+        - $ref: "#/components/parameters/PostId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -186,7 +199,8 @@ paths:
       summary: Like a post.
       description: |-
         Like a post.
-      parameters: { $ref: "#/components/parameters/PostId"}
+      parameters: 
+        - $ref: "#/components/parameters/PostId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest"}
@@ -199,7 +213,8 @@ paths:
       summary: Unlike a post.
       description: |-
         Unlike a post.
-      parameters: { $ref: "#/components/parameters/PostId"}
+      parameters: 
+        - $ref: "#/components/parameters/PostId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest"}
@@ -213,7 +228,8 @@ paths:
       summary: Comment a post.
       description: |-
         Comment a post.
-      parameters: { $ref: "#/components/parameters/PostId"}
+      parameters: 
+        - $ref: "#/components/parameters/PostId"
       responses:
         "201":
           description: Comment created
@@ -230,7 +246,8 @@ paths:
       summary: Gets the list of comments.
       description: |-
         Gets the list of comments.
-      parameters: { $ref: "#/components/parameters/PostId"}
+      parameters: 
+        - $ref: "#/components/parameters/PostId"
       responses:
         "200":
           description: Returns the list of comment related to the requested post.
@@ -247,7 +264,8 @@ paths:
       summary: Uncomment a post.
       description: |-
         Uncomment a post.
-      parameters: { $ref: "#/components/parameters/PostId"}
+      parameters: 
+        - $ref: "#/components/parameters/PostId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest"}
@@ -261,7 +279,8 @@ paths:
       summary: Blocks the requested user.
       description: |-
         Blocks the requested user.
-      parameters: { $ref: "#/components/parameters/UserId" }
+      parameters: 
+        - $ref: "#/components/parameters/UserId" 
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -274,7 +293,8 @@ paths:
       summary: Unlocks the requested user.
       description: |-
         Unlocks the requested user.
-      parameters: { $ref: "#/components/parameters/UserId" }
+      parameters: 
+        - $ref: "#/components/parameters/UserId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -304,7 +324,8 @@ paths:
       summary: Follows a user.
       description: |-
         Follows the user specified with the UserId.
-      parameters: { $ref: "#/components/parameters/UserId" }
+      parameters: 
+        - $ref: "#/components/parameters/UserId" 
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -318,6 +339,8 @@ paths:
       summary: Unfollows a user.
       description: |-
         Unfollows the user specified with the UserId.
+      parameters: 
+        - $ref: "#/components/parameters/UserId" 
       responses:
         "204": { $ref: "#/components/responses/NoContent" } #unfollowed the user
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -358,6 +381,15 @@ paths:
 #-----------------------------
 
 components:
+
+  securitySchemes:
+    bearerAuthentication:
+      description: |
+        User token that uses the entityId of the logged user.
+        Done accordingly to the project specification
+      type: http
+      scheme: bearer    
+      
   schemas:
     User:
       description: |
@@ -380,10 +412,10 @@ components:
           type: integer
           example: 0
         isBlocked:
-          type: bool
+          type: boolean
           example: false
         isFollowed:
-          type: bool
+          type: boolean
           example: false
 
     UserReduced:
@@ -435,10 +467,10 @@ components:
           type: integer
           example: 0
         timeOfCreation:
-          type: date-time
+          type: string
           example: "2002-01-11T18:45:54.215500172Z"
         isliked:
-          type: bool
+          type: boolean
           example: false
 
     Stream:
@@ -466,17 +498,19 @@ components:
     Comment: 
       description: A comment structure with Text, PostId and UserId.
       type: array
-      properties:
-        postId:
-          type: integer
-          example: 1
-        userId:
-          type: integer
-          example: 1
-        text:
-          type: string
-          pattern: ".*"
-          example: A beautiful sunset!
+      items:
+        type: object
+        properties:
+          postId:
+            type: integer
+            example: 1
+          userId:
+            type: integer
+            example: 1
+          text:
+            type: string
+            pattern: ".*"
+            example: A beautiful sunset!
 
     CommentList:
       type: array
@@ -538,11 +572,3 @@ components:
       description: The provided file is too large.
     UnsupportedMediaType:
       description: The file type is unsupported. Provide a jpg or png file. 
-
-  securitySchemas:
-    bearerAuthentication:
-      description: |
-        User token that uses the entityId of the logged user.
-        Done accordingly to the project specification
-      type: http
-      scheme: bearer    
