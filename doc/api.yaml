@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.3
 
 info:
   title: WasaPhotoAPI Specification
@@ -94,7 +94,8 @@ paths:
       description: |-
         Returns the full profile of the requested user.
         If a user has blocked the requested user, it will not be displayed.
-      parameters: [ $ref: "#/components/parameters/UserId" ]
+      parameters: 
+        - $ref: "#/components/parameters/UserId" 
       responses:
         "200":
           description: Returns the User profile
