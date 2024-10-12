@@ -34,12 +34,39 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/u-siri-ous/WASAPhoto/service/api/components/structs"
 )
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	GetName() (string, error)
-	SetName(name string) error
+
+	//Authorization
+	CheckUserId(userId uint64) (bool, error)
+
+	//Login
+	InsertUser(username string) (uint64, bool, error)
+
+	//Search User
+	SearchUsersByUsername(requesterUserId uint64, search string) (structs.UserList, error)
+	GetUser(currentUserId uint64, requestedUserId uint64) (structs.User, error)
+
+	//Ban
+	BlockUser(userId uint64, userToBlockId uint64) error
+	UnblockUser(userId uint64, userToBlockId uint64) error
+	CheckBlock(userId uint64, userToCheckId uint64) (bool, error)
+	ListOfBlocker(userid uint64) (structs.UserList, error)
+
+	//Follow
+	FollowUser(userId uint64, userToFollowId uint64) error
+	UnfollowUser(userId uint64, userToUnfollowId uint64) error
+
+	//Posts
+	CreatePost(userId uint64, caption string, uploadTime time.Time) (uint64, error)
+	DeletePost(currentUserId uint64, postId uint64) error
+	CheckPostId(postId uint64) (bool, error)
 
 	Ping() error
 }
@@ -55,14 +82,22 @@ func New(db *sql.DB) (AppDatabase, error) {
 		return nil, errors.New("database is required when building a AppDatabase")
 	}
 
-	// Check if table exists. If not, the database is empty, and we need to create the structure
-	var tableName string
-	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='example_table';`).Scan(&tableName)
-	if errors.Is(err, sql.ErrNoRows) {
-		sqlStmt := `CREATE TABLE example_table (id INTEGER NOT NULL PRIMARY KEY, name TEXT);`
-		_, err = db.Exec(sqlStmt)
-		if err != nil {
-			return nil, fmt.Errorf("error creating database structure: %w", err)
+	TableMapping := map[string]string{
+		"users":   UsersSchema,
+		"blocks":  BlocksSchema,
+		"follows": FollowsSchema,
+		"posts":   PostsSchema,
+	}
+
+	for tableName, sqlStmt := range TableMapping {
+		err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name= ? ;`, tableName).Scan(&tableName)
+
+		if errors.Is(err, sql.ErrNoRows) {
+			_, err = db.Exec(sqlStmt)
+
+			if err != nil {
+				return nil, fmt.Errorf("error creating database structure.\n%s -> %w", tableName, err)
+			}
 		}
 	}
 
