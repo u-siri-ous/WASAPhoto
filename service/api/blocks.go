@@ -30,10 +30,41 @@ func (rt *_router) BlockUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
+	userAlreadyBanned, checkAlreadyBannedErrors := rt.db.CheckBlock(userToBan, ctx.Uid)
+
+	if checkAlreadyBannedErrors != nil {
+		utility.LogWithError("BlockUser: error while checking the block blocking the user - CheckBlock", http.StatusInternalServerError, checkAlreadyBannedErrors, w, ctx)
+		return
+	}
+
+	if userAlreadyBanned {
+		utility.LogWithField("BlockUser: the requester already blocked the user", http.StatusBadRequest, "userId", userToBan, w, ctx)
+		return
+	}
+
+	if ctx.Uid == userToBan {
+		utility.LogWithField("BlockUser: the requester and the user to ban cannot be the same", http.StatusBadRequest, "userId", userToBan, w, ctx)
+		return
+	}
+
 	insertError := rt.db.BlockUser(ctx.Uid, userToBan)
 
 	if insertError != nil {
 		utility.LogWithError("BlockUser: error while blocking the user - BlockUser", http.StatusInternalServerError, insertError, w, ctx)
+		return
+	}
+
+	unfollowError := rt.db.UnfollowUser(ctx.Uid, userToBan)
+
+	if unfollowError != nil {
+		utility.LogWithError("BlockUser: error while unfollowing the user after block - BlockUser", http.StatusInternalServerError, unfollowError, w, ctx)
+		return
+	}
+
+	unfollowReversedError := rt.db.UnfollowUser(userToBan, ctx.Uid)
+
+	if unfollowReversedError != nil {
+		utility.LogWithError("BlockUser: error while unfollowing the blocker - BlockUser", http.StatusInternalServerError, unfollowReversedError, w, ctx)
 		return
 	}
 
@@ -57,6 +88,11 @@ func (rt *_router) UnblockUser(w http.ResponseWriter, r *http.Request, ps httpro
 
 	if !userExists {
 		utility.LogWithField("UnblockUser: the requested user does not exists!", http.StatusNotFound, "userId", userToUnban, w, ctx)
+		return
+	}
+
+	if ctx.Uid == userToUnban {
+		utility.LogWithField("UnblockUser: the requester and the user to unban cannot be the same", http.StatusBadRequest, "userId", userToUnban, w, ctx)
 		return
 	}
 

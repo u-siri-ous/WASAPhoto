@@ -9,14 +9,13 @@ import (
 
 func (db *appdbimpl) CheckUserId(userId uint64) (bool, error) {
 	var response bool
-	const checkUserQuery = `SELECT TRUE FROM users WHERE id = ?`
+	const checkUserQuery = `SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)`
 	responseError := db.c.QueryRow(checkUserQuery, userId).Scan(&response)
 
 	return response, responseError
 }
 
 func (db *appdbimpl) GetUserIdByUsername(username string) (uint64, error) {
-	// userId_by_username returns the ReducedUser with the given username
 	var id uint64
 	err := db.c.QueryRow("SELECT id FROM users WHERE username=?", username).Scan(&id)
 	return id, err
@@ -64,7 +63,7 @@ func (db *appdbimpl) SearchUsersByUsername(requestingUserId uint64, search strin
 	defer rows.Close()
 
 	for rows.Next() {
-		var user structs.User
+		var user structs.UserReduced
 		if err := rows.Scan(&user.Id, &user.Username); err != nil {
 			return result, err
 		}
@@ -98,18 +97,18 @@ func (db *appdbimpl) GetUser(currentUserId uint64, requestedUserId uint64) (stru
         		ELSE 0 
     		END) AS isFollowed,
 			MAX(CASE 
-        		WHEN b.blockerUserId = f3.followerUserId THEN 1 
+        		WHEN b.blockerUserId = ? THEN 1 
         		ELSE 0 
     		END) AS isBlocked
 		FROM users u
 		LEFT JOIN follows f1 ON u.id = f1.followedUserId
 		LEFT JOIN follows f2 ON u.id = f2.followerUserId
 		LEFT JOIN follows f3 ON u.id = f3.followedUserId
-		LEFT JOIN blocks b ON u.id = b.blockedUserId
+		LEFT JOIN blocks b ON ? = b.blockedUserId
 		WHERE u.id = ?
 	`
 
-	err := db.c.QueryRow(userGetQuery, currentUserId, requestedUserId).Scan(&username,
+	err := db.c.QueryRow(userGetQuery, currentUserId, currentUserId, requestedUserId, requestedUserId).Scan(&username,
 		&numberOfFollowers,
 		&accountsFollowed,
 		&isFollowed,
@@ -129,4 +128,21 @@ func (db *appdbimpl) GetUser(currentUserId uint64, requestedUserId uint64) (stru
 	}
 
 	return result, err
+}
+
+func (db *appdbimpl) CheckUsernameAvailability(newUsername string) (bool, error) {
+	var response bool
+	const checkUsernameAvailabilityQuery = "SELECT EXISTS (SELECT 1 FROM users WHERE username = ?)"
+
+	errors := db.c.QueryRow(checkUsernameAvailabilityQuery, newUsername).Scan(&response)
+
+	return response, errors
+}
+
+func (db *appdbimpl) SetUsername(currentUserId uint64, newUsername string) error {
+	const setUsernameQuery = "UPDATE users SET username = ? WHERE id = ?"
+
+	_, err := db.c.Exec(setUsernameQuery, newUsername, currentUserId)
+
+	return err
 }

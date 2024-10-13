@@ -35,7 +35,7 @@ func (rt *_router) Login(w http.ResponseWriter, r *http.Request, ps httprouter.P
 
 	ctx.Logger.Debug("Login: OK")
 
-	result := structs.User{Id: uid, Username: req.Username}
+	result := structs.UserReduced{Id: uid, Username: req.Username}
 	w.Header().Set("content-type", "application/json")
 	if created {
 		w.WriteHeader(http.StatusCreated)

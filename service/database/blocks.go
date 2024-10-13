@@ -59,7 +59,7 @@ func (db *appdbimpl) ListOfBlocker(currentUserId uint64) (structs.UserList, erro
 	defer response.Close()
 
 	for response.Next() {
-		var user structs.User
+		var user structs.UserReduced
 		if responseErrors := response.Scan(&user.Id, &user.Username); responseErrors != nil {
 			return result, responseErrors
 		}

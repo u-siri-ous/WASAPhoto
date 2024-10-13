@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.3
 
 info:
   title: WasaPhotoAPI Specification
@@ -94,7 +94,8 @@ paths:
       description: |-
         Returns the full profile of the requested user.
         If a user has blocked the requested user, it will not be displayed.
-      parameters: [ $ref: "#/components/parameters/UserId" ]
+      parameters: 
+        - $ref: "#/components/parameters/UserId" 
       responses:
         "200":
           description: Returns the User profile
@@ -173,6 +174,8 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Post" }
         "400": {$ref: "#/components/responses/BadRequest"}
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
         "413": {$ref: "#/components/responses/EntityTooLarge"}
         "415": {$ref: "#/components/responses/UnsupportedMediaType"}
         "500": {$ref: "#/components/responses/InternalServerError"}
@@ -221,6 +224,24 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": {$ref: "#/components/responses/InternalServerError"}
 
+    get:
+      tags: ["post"]
+      operationId: getLikes
+      summary: Gets the list of user that liked the post.
+      description: |-
+        Gets the list of user that liked the post. The user that blocked the requester will not be shown.
+      parameters: 
+        - $ref: "#/components/parameters/PostId"
+      responses:
+        "200":
+          description: Returns the list of users that liked the post.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserList" }
+        "400": { $ref: "#/components/responses/BadRequest"}
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": {$ref: "#/components/responses/InternalServerError"}
+
   /posts/{postId}/comments:
     post:
       tags: ["post"]
@@ -230,6 +251,12 @@ paths:
         Comment a post.
       parameters: 
         - $ref: "#/components/parameters/PostId"
+      requestBody:
+        description: Comment details
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CommentRequest" }
+        required: true
       responses:
         "201":
           description: Comment created
@@ -245,7 +272,7 @@ paths:
       operationId: getComments
       summary: Gets the list of comments.
       description: |-
-        Gets the list of comments.
+        Gets the list of comments. The user that blocked the requester will not be shown.
       parameters: 
         - $ref: "#/components/parameters/PostId"
       responses:
@@ -257,7 +284,8 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest"}
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": {$ref: "#/components/responses/InternalServerError"}
-      
+
+  /posts/{postId}/comments/{commentId}:
     delete:
       tags: ["post"]
       operationId: uncommentPhoto
@@ -266,10 +294,12 @@ paths:
         Uncomment a post.
       parameters: 
         - $ref: "#/components/parameters/PostId"
+        - $ref: "#/components/parameters/CommentId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest"}
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
         "500": {$ref: "#/components/responses/InternalServerError"}
 
   /block/{userId}:
@@ -315,6 +345,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UserList" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /follow/{userId}:
@@ -348,13 +379,15 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /followers:
+  /followers/{userId}:
     get:
       tags: ["follow"]
       operationId: getFollowers
       summary: Gets the list of followers.
       description: |-
-        Gets the list of followers.
+        Gets the list of followers. The user that blocked the requester will not be shown.
+      parameters: 
+        - $ref: "#/components/parameters/UserId" 
       responses:
         "200": 
           description: Returns the list of the users that follows the logged user.
@@ -365,13 +398,15 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /following:
+  /following/{userId}:
     get:
       tags: ["follow"]
       operationId: getFollowing
       summary: Gets the list of following.
       description: |-
-        Gets the list of following.
+        Gets the list of following. The user that blocked the requester will not be shown.
+      parameters: 
+        - $ref: "#/components/parameters/UserId" 
       responses:
         "200": 
           description: Returns the list of the users that the logged user follows.
@@ -496,8 +531,8 @@ components:
       type: string
       example: A beautiful sunset!
       pattern: ".*"
-      minLength: 0
-      maxLength: 2000
+      minLength: 1
+      maxLength: 255
 
     Comment: 
       description: A comment structure with Text, PostId and UserId.
@@ -521,6 +556,11 @@ components:
       description: List of comments
       items: 
         $ref: "#/components/schemas/Comment"
+    
+    CommentRequest:
+      type: object
+      properties:
+        text: {$ref: "#/components/schemas/Text"}
 
   parameters:
     UsernameQuery:
@@ -550,6 +590,17 @@ components:
       in: path
       name: postId
       description: The EntityId of the post.
+      schema:
+        type: integer
+        example: 1
+        maximum: 18446744073709551615 
+        minimum: 0
+      required: true
+
+    CommentId:
+      in: path
+      name: commentId
+      description: The EntityId of the comment.
       schema:
         type: integer
         example: 1

@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/u-siri-ous/WASAPhoto/service/api/components/requests"
 	"github.com/u-siri-ous/WASAPhoto/service/api/components/requests/utility"
 	"github.com/u-siri-ous/WASAPhoto/service/api/components/structs"
 	"github.com/u-siri-ous/WASAPhoto/service/api/reqcontext"
@@ -30,7 +31,7 @@ func (rt *_router) CreatePost(w http.ResponseWriter, r *http.Request, ps httprou
 	defer photo.Close()
 
 	if photoHeader.Header.Get("Content-Type") != storage.AllowedMimeType {
-		utility.LogError("CreatePost: unsupported file", http.StatusBadRequest, w, ctx)
+		utility.LogError("CreatePost: unsupported file", http.StatusUnsupportedMediaType, w, ctx)
 		return
 	}
 
@@ -101,6 +102,206 @@ func (rt *_router) DeletePost(w http.ResponseWriter, r *http.Request, ps httprou
 			utility.LogWithError("DeletePost: error while deleting the photo from the storage", http.StatusInternalServerError, deletePostError, w, ctx)
 			return
 		}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (rt *_router) LikePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	postToLike, requestError := strconv.ParseUint(ps.ByName("postId"), 10, 64)
+
+	if requestError != nil {
+		utility.LogWithError("LikePost: error while parsing the request", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	postExists, checkPostError := rt.db.CheckPostId(postToLike)
+	if checkPostError != nil {
+		utility.LogWithError("LikePost: error while checking the request", http.StatusInternalServerError, checkPostError, w, ctx)
+		return
+	}
+
+	if !postExists {
+		utility.LogWithField("LikePost: the requested post does not exists", http.StatusBadRequest, "postId", postToLike, w, ctx)
+		return
+	}
+
+	alreadyLiked, checkLikeError := rt.db.CheckLikePost(ctx.Uid, postToLike)
+	if checkLikeError != nil {
+		utility.LogWithError("LikePost: error while checking if the post is already liked", http.StatusInternalServerError, checkLikeError, w, ctx)
+		return
+	}
+
+	if alreadyLiked > 0 {
+		utility.LogWithField("LikePost: the post is already liked!", http.StatusBadRequest, "postId", postToLike, w, ctx)
+		return
+	}
+
+	insertLikeError := rt.db.InsertLikePost(ctx.Uid, postToLike)
+
+	if insertLikeError != nil {
+		utility.LogWithError("LikePost: error during the like process", http.StatusBadRequest, insertLikeError, w, ctx)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (rt *_router) UnlikePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	postToLike, requestError := strconv.ParseUint(ps.ByName("postId"), 10, 64)
+
+	if requestError != nil {
+		utility.LogWithError("UnlikePost: error while parsing the request", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	postExists, checkPostError := rt.db.CheckPostId(postToLike)
+	if checkPostError != nil {
+		utility.LogWithError("UnlikePost: error while checking the request", http.StatusInternalServerError, checkPostError, w, ctx)
+		return
+	}
+
+	if !postExists {
+		utility.LogWithField("UnlikePost: the requested post does not exists", http.StatusBadRequest, "postId", postToLike, w, ctx)
+		return
+	}
+
+	alreadyLiked, checkLikeError := rt.db.CheckLikePost(ctx.Uid, postToLike)
+	if checkLikeError != nil {
+		utility.LogWithError("UnlikePost: error while checking if the post is already liked", http.StatusInternalServerError, checkLikeError, w, ctx)
+		return
+	}
+
+	if alreadyLiked <= 0 {
+		utility.LogWithField("UnlikePost: the post is not liked!", http.StatusBadRequest, "postId", postToLike, w, ctx)
+		return
+	}
+
+	insertLikeError := rt.db.DeleteLikePost(ctx.Uid, postToLike)
+
+	if insertLikeError != nil {
+		utility.LogWithError("UnlikePost: error during the unlike process", http.StatusBadRequest, insertLikeError, w, ctx)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (rt *_router) Likes(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	postToCheckLike, requestError := strconv.ParseUint(ps.ByName("postId"), 10, 64)
+
+	if requestError != nil {
+		utility.LogWithError("Likes: error while parsing the request", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	postExists, checkPostError := rt.db.CheckPostId(postToCheckLike)
+	if checkPostError != nil {
+		utility.LogWithError("Likes: error while checking the request", http.StatusInternalServerError, checkPostError, w, ctx)
+		return
+	}
+
+	if !postExists {
+		utility.LogWithField("Likes: the requested post does not exists", http.StatusNotFound, "postId", postToCheckLike, w, ctx)
+		return
+	}
+
+	userListResponse, getLikesError := rt.db.GetLikes(ctx.Uid, postToCheckLike)
+	if getLikesError != nil {
+		utility.LogWithError("Likes: error while getting the list of likes - GetLikes", http.StatusInternalServerError, getLikesError, w, ctx)
+		return
+	}
+
+	w.Header().Set("content-type", "application/json")
+	_ = json.NewEncoder(w).Encode(userListResponse)
+}
+
+func (rt *_router) CommentPost(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	var request requests.Comment
+
+	postToComment, requestError := strconv.ParseUint(ps.ByName("postId"), 10, 64)
+
+	if requestError != nil {
+		utility.LogWithError("CommentPost: error while parsing the request - path", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	requestBodyError := json.NewDecoder(r.Body).Decode(&request)
+
+	if requestBodyError != nil {
+		utility.LogWithError("CommentPost: error while parsing the request - body", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	if !request.IsValid() {
+		utility.LogWithField("CommentPost: error while validating the request - body", http.StatusBadRequest, "text", request.Text, w, ctx)
+		return
+	}
+
+	postExists, checkPostError := rt.db.CheckPostId(postToComment)
+	if checkPostError != nil {
+		utility.LogWithError("CommentPost: error while checking the request - CheckPostId", http.StatusInternalServerError, checkPostError, w, ctx)
+		return
+	}
+
+	if !postExists {
+		utility.LogWithField("CommentPost: the requested post does not exists", http.StatusNotFound, "postId", postToComment, w, ctx)
+		return
+	}
+
+	insertError := rt.db.InsertCommentPost(ctx.Uid, postToComment, request.Text)
+
+	if insertError != nil {
+		utility.LogWithError("CommentPost: error while creating the comment - InsertCommentPost", http.StatusBadRequest, insertError, w, ctx)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (rt *_router) DeleteCommentPost(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	postId, requestError := strconv.ParseUint(ps.ByName("postId"), 10, 64)
+
+	if requestError != nil {
+		utility.LogWithError("CommentPost: error while parsing the request", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	commentToDelete, requestError := strconv.ParseUint(ps.ByName("commentId"), 10, 64)
+
+	if requestError != nil {
+		utility.LogWithError("CommentPost: error while parsing the request", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	postExists, checkPostError := rt.db.CheckPostId(postId)
+	if checkPostError != nil {
+		utility.LogWithError("CommentPost: error while checking the request - CheckPostId", http.StatusInternalServerError, checkPostError, w, ctx)
+		return
+	}
+
+	if !postExists {
+		utility.LogWithField("CommentPost: the requested post does not exists", http.StatusNotFound, "postId", postId, w, ctx)
+		return
+	}
+
+	commentExists, checkCommentError := rt.db.CheckCommentId(commentToDelete)
+
+	if checkCommentError != nil {
+		utility.LogWithError("CommentPost: error while checking the request - CheckCommentId", http.StatusInternalServerError, checkCommentError, w, ctx)
+		return
+	}
+
+	if !commentExists {
+		utility.LogWithField("CommentPost: the requested post does not exists", http.StatusNotFound, "commentId", commentToDelete, w, ctx)
+		return
+	}
+
+	deleteError := rt.db.DeleteCommentPost(ctx.Uid, postId, commentToDelete)
+
+	if deleteError != nil {
+		utility.LogWithError("CommentPost: error while deleting the comment - DeleteCommentPost", http.StatusBadRequest, deleteError, w, ctx)
+		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)

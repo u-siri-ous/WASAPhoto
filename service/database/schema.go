@@ -40,4 +40,27 @@ const (
 			FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
 		);
 	`
+
+	LikesSchema = `
+		CREATE TABLE IF NOT EXISTS likes (
+			likedPostId 	INTEGER NOT NULL,
+			userId 			INTEGER NOT NULL,
+
+			PRIMARY KEY (likedPostId, userId),
+			FOREIGN KEY (likedPostId) REFERENCES posts(postId) ON DELETE CASCADE,
+			FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+		);
+	`
+
+	CommentsSchema = `
+		CREATE TABLE IF NOT EXISTS comments (
+			commentId 		INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+			postId		 	INTEGER NOT NULL,
+			userId 			INTEGER NOT NULL,
+			text			TEXT,
+
+			FOREIGN KEY (postId) REFERENCES posts(postId) ON DELETE CASCADE,
+			FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+		);
+	`
 )

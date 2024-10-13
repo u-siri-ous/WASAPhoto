@@ -10,6 +10,11 @@ type User struct {
 	IsFollowed        *bool   `json:"isFollowed"`
 }
 
+type UserReduced struct {
+	Id       uint64 `json:"userId"`
+	Username string `json:"username"`
+}
+
 type UserList struct {
-	Users []User `json:"users"`
+	Users []UserReduced `json:"users"`
 }

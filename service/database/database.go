@@ -52,6 +52,8 @@ type AppDatabase interface {
 	//Search User
 	SearchUsersByUsername(requesterUserId uint64, search string) (structs.UserList, error)
 	GetUser(currentUserId uint64, requestedUserId uint64) (structs.User, error)
+	CheckUsernameAvailability(newUsername string) (bool, error)
+	SetUsername(currentUserId uint64, newUsername string) error
 
 	//Ban
 	BlockUser(userId uint64, userToBlockId uint64) error
@@ -62,11 +64,20 @@ type AppDatabase interface {
 	//Follow
 	FollowUser(userId uint64, userToFollowId uint64) error
 	UnfollowUser(userId uint64, userToUnfollowId uint64) error
+	GetFollowers(currentUserId uint64, userId uint64) (structs.UserList, error)
+	GetFollowing(currentUserId uint64, userId uint64) (structs.UserList, error)
 
 	//Posts
 	CreatePost(userId uint64, caption string, uploadTime time.Time) (uint64, error)
 	DeletePost(currentUserId uint64, postId uint64) error
 	CheckPostId(postId uint64) (bool, error)
+	CheckLikePost(currentUserId uint64, postId uint64) (uint64, error)
+	GetLikes(currentUserId uint64, postId uint64) (structs.UserList, error)
+	InsertLikePost(currentUserId uint64, postId uint64) error
+	DeleteLikePost(currentUserId uint64, postId uint64) error
+	InsertCommentPost(currentUserId uint64, postId uint64, text string) error
+	DeleteCommentPost(currentUserId uint64, postId uint64, commentId uint64) error
+	CheckCommentId(commentId uint64) (bool, error)
 
 	Ping() error
 }
@@ -83,10 +94,12 @@ func New(db *sql.DB) (AppDatabase, error) {
 	}
 
 	TableMapping := map[string]string{
-		"users":   UsersSchema,
-		"blocks":  BlocksSchema,
-		"follows": FollowsSchema,
-		"posts":   PostsSchema,
+		"users":    UsersSchema,
+		"blocks":   BlocksSchema,
+		"follows":  FollowsSchema,
+		"posts":    PostsSchema,
+		"likes":    LikesSchema,
+		"comments": CommentsSchema,
 	}
 
 	for tableName, sqlStmt := range TableMapping {

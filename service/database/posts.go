@@ -1,6 +1,10 @@
 package database
 
-import "time"
+import (
+	"time"
+
+	"github.com/u-siri-ous/WASAPhoto/service/api/components/structs"
+)
 
 func (db *appdbimpl) CreatePost(currentUserId uint64, caption string, uploadTime time.Time) (uint64, error) {
 	const createPostQuery = "INSERT INTO posts (userId, caption, likes, comments, uploadTime) VALUES (?, ?, 0, 0, ?)"
@@ -27,8 +31,132 @@ func (db *appdbimpl) DeletePost(currentUserId uint64, postId uint64) error {
 
 func (db *appdbimpl) CheckPostId(postId uint64) (bool, error) {
 	var response bool
-	const checkPostQuery = `SELECT TRUE FROM posts WHERE postId = ?`
+	const checkPostQuery = `SELECT EXISTS (SELECT 1 FROM posts WHERE postId = ?)`
 	responseError := db.c.QueryRow(checkPostQuery, postId).Scan(&response)
+
+	return response, responseError
+}
+
+func (db *appdbimpl) CheckLikePost(currentUserId uint64, postId uint64) (uint64, error) {
+	var response uint64
+	const checkLikeQuery = "SELECT COUNT(*) FROM likes WHERE likedPostId = ? AND userId = ?"
+	responseError := db.c.QueryRow(checkLikeQuery, postId, currentUserId).Scan(&response)
+
+	if responseError != nil {
+		return 0, responseError
+	}
+
+	return response, responseError
+}
+
+func (db *appdbimpl) GetLikes(currentUserId uint64, postId uint64) (structs.UserList, error) {
+	var result structs.UserList
+
+	const getLikesQuery = "SELECT pLikes.id, pLikes.username FROM ( SELECT u.id, u.username FROM users u LEFT JOIN posts lPosts ON lPosts.postId = ? LEFT JOIN likes l ON l.userId = u.id ) pLikes LEFT JOIN blocks b ON b.blockerUserId = pLikes.id WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL"
+
+	rows, errors := db.c.Query(getLikesQuery, postId, currentUserId)
+
+	if errors != nil {
+		return result, errors
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user structs.UserReduced
+		if err := rows.Scan(&user.Id, &user.Username); err != nil {
+			return result, err
+		}
+		result.Users = append(result.Users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return result, err
+	}
+	return result, errors
+}
+
+func (db *appdbimpl) InsertLikePost(currentUserId uint64, postId uint64) error {
+	const insertLikeQuery = "INSERT INTO likes (likedPostId, userId) VALUES (?, ?)"
+	const deleteLikeQuery = "DELETE FROM likes WHERE likedPostId = ? AND userId = ?"
+	const incrementPostLike = "UPDATE posts SET likes = likes + 1"
+	_, err := db.c.Exec(insertLikeQuery, postId, currentUserId)
+
+	if err == nil {
+		_, incrementErr := db.c.Exec(incrementPostLike)
+		if incrementErr != nil {
+			_, deleteLikeError := db.c.Exec(deleteLikeQuery, postId, currentUserId)
+			if deleteLikeError != nil {
+				return deleteLikeError
+			}
+			return incrementErr
+		}
+	}
+
+	return err
+}
+
+func (db *appdbimpl) DeleteLikePost(currentUserId uint64, postId uint64) error {
+	const deleteLikeQuery = "DELETE FROM likes WHERE likedPostId = ? AND userId = ?"
+	const decrementPostLike = "UPDATE posts SET likes = likes - 1"
+	_, err := db.c.Exec(deleteLikeQuery, postId, currentUserId)
+
+	if err == nil {
+		_, incrementErr := db.c.Exec(decrementPostLike)
+		if incrementErr != nil {
+			return incrementErr
+		}
+	}
+
+	return err
+}
+
+func (db *appdbimpl) InsertCommentPost(currentUserId uint64, postId uint64, text string) error {
+	const insertCommentQuery = "INSERT INTO comments (postId, userId, text) VALUES (?, ?, ?)"
+	const deleteCommentQuery = "DELETE FROM comments WHERE commentId = ? AND userId = ?"
+	const incrementPostLike = "UPDATE posts SET comments = comments + 1"
+	result, err := db.c.Exec(insertCommentQuery, postId, currentUserId, text)
+
+	if err == nil {
+		commentId, errors := result.LastInsertId()
+
+		if errors != nil {
+			return errors
+		}
+
+		_, incrementErr := db.c.Exec(incrementPostLike)
+		if incrementErr != nil {
+			_, err := db.c.Exec(deleteCommentQuery, commentId, currentUserId)
+
+			if err != nil {
+				return err
+			}
+
+			return incrementErr
+		}
+	}
+
+	return err
+}
+
+func (db *appdbimpl) DeleteCommentPost(currentUserId uint64, postId uint64, commentId uint64) error {
+	const deleteCommentQuery = "DELETE FROM comments WHERE commentId = ? AND userId = ? AND postId = ?"
+	const decrementPostLike = "UPDATE posts SET comments = comments - 1"
+	_, err := db.c.Exec(deleteCommentQuery, commentId, currentUserId, postId)
+
+	if err == nil {
+		_, decrementErr := db.c.Exec(decrementPostLike)
+		if decrementErr != nil {
+			return decrementErr
+		}
+	}
+
+	return err
+}
+
+func (db *appdbimpl) CheckCommentId(commentId uint64) (bool, error) {
+	var response bool
+	const checkCommentQuery = `SELECT EXISTS (SELECT 1 FROM comments WHERE commentId = ?)`
+	responseError := db.c.QueryRow(checkCommentQuery, commentId).Scan(&response)
 
 	return response, responseError
 }
