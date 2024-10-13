@@ -1,4 +1,4 @@
-module git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated
+module github.com/u-siri-ous/WASAPhoto
 
 go 1.17
 
