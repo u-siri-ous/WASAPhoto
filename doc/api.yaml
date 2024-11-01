@@ -32,12 +32,6 @@ tags:
   - name: post
     description: Operations related to photos.
 
-  - name: likes
-    description: Operations related to likes.
-
-  - name: comments
-    description: Operations related to comments.
-
   - name: settings
     description: Operations related to the user settings 
 
@@ -489,6 +483,8 @@ components:
     UserList:
       description: List of Users
       type: array
+      minItems: 0
+      maxItems: 100
       items: 
         $ref: "#/components/schemas/UserReduced"
 
@@ -542,6 +538,8 @@ components:
     Stream:
       description: List of posts
       type: array
+      minItems: 0
+      maxItems: 100
       items: 
         $ref: "#/components/schemas/Post"
 
@@ -563,27 +561,27 @@ components:
 
     Comment: 
       description: A comment structure with Text, PostId and UserId.
-      type: array
-      items:
-        type: object
-        properties:
-          postId:
-            type: integer
-            example: 1
-            description: postId
-          userId:
-            type: integer
-            example: 1
-            description: userId
-          text:
-            type: string
-            pattern: ".*"
-            example: A beautiful sunset!
-            description: the text to include in the comment
+      type: object
+      properties:
+        postId:
+          type: integer
+          example: 1
+          description: postId
+        userId:
+          type: integer
+          example: 1
+          description: userId
+        text:
+          type: string
+          pattern: ".*"
+          example: A beautiful sunset!
+          description: the text to include in the comment
 
     CommentList:
       description: List of comments
       type: array
+      minItems: 0
+      maxItems: 100
       items: 
         $ref: "#/components/schemas/Comment"
     
