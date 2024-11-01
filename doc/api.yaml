@@ -590,8 +590,7 @@ components:
       type: object
       properties:
         text: 
-          - $ref: "#/components/schemas/Text"
-        description: comment request
+          $ref: "#/components/schemas/Text"
 
   parameters:
     UsernameQuery:
