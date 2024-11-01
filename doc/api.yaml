@@ -32,6 +32,12 @@ tags:
   - name: post
     description: Operations related to photos.
 
+  - name: like
+    description: Operations related to management of likes.
+
+  - name: comment
+    description: Operations related to management of comments.
+
   - name: settings
     description: Operations related to the user settings 
 
@@ -204,7 +210,7 @@ paths:
       - $ref: "#/components/parameters/PostId"
 
     post:
-      tags: ["post"]
+      tags: ["like"]
       operationId: likePhoto
       summary: Like a post.
       description: |-
@@ -217,7 +223,7 @@ paths:
         "500": {$ref: "#/components/responses/InternalServerError"}
       
     delete:
-      tags: ["post"]
+      tags: ["like"]
       operationId: unlikePhoto
       summary: Unlike a post.
       description: |-
@@ -229,9 +235,9 @@ paths:
         "500": {$ref: "#/components/responses/InternalServerError"}
 
     get:
-      tags: ["post"]
+      tags: ["like"]
       operationId: getLikes
-      summary: Gets the list of user that liked the post.
+      summary: Gets the list of users that liked the post.
       description: |-
         Gets the list of user that liked the post. The user that blocked the requester will not be shown.
       responses:
@@ -249,7 +255,7 @@ paths:
       - $ref: "#/components/parameters/PostId"
 
     post:
-      tags: ["post"]
+      tags: ["comment"]
       operationId: commentPhoto
       summary: Comment a post.
       description: |-
@@ -271,7 +277,7 @@ paths:
         "500": {$ref: "#/components/responses/InternalServerError"}
 
     get:
-      tags: ["post"]
+      tags: ["comment"]
       operationId: getComments
       summary: Gets the list of comments.
       description: |-
@@ -292,7 +298,7 @@ paths:
       - $ref: "#/components/parameters/CommentId"
 
     delete:
-      tags: ["post"]
+      tags: ["comment"]
       operationId: uncommentPhoto
       summary: Uncomment a post.
       description: |-
