@@ -30,7 +30,13 @@ tags:
     description: Operations related to followers and following.
 
   - name: post
-    description: Operation related to photos.
+    description: Operations related to photos.
+
+  - name: like
+    description: Operations related to management of likes.
+
+  - name: comment
+    description: Operations related to management of comments.
 
   - name: settings
     description: Operations related to the user settings 
@@ -67,6 +73,9 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
   
   /users:
+    parameters: 
+      - $ref: "#/components/parameters/UsernameQuery" 
+
     get:
       tags: ["user"]
       operationId: searchUsers
@@ -74,8 +83,6 @@ paths:
       description: |-
         Search the users in the database. 
         If a user has blocked the requested user, it will not be displayed.
-      parameters: 
-        - $ref: "#/components/parameters/UsernameQuery" 
       responses:
         "200":
           description: Returns the list of users according to the search criteria
@@ -87,6 +94,9 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /users/{userId}:
+    parameters: 
+      - $ref: "#/components/parameters/UserId" 
+
     get:
       tags: ["user"]
       operationId: getUserProfile
@@ -94,8 +104,6 @@ paths:
       description: |-
         Returns the full profile of the requested user.
         If a user has blocked the requested user, it will not be displayed.
-      parameters: 
-        - $ref: "#/components/parameters/UserId" 
       responses:
         "200":
           description: Returns the User profile
@@ -109,14 +117,15 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /users/{userId}/stream:
+    parameters: 
+      - $ref: "#/components/parameters/UserId"
+
     get:
       tags: ["user"]
       operationId: getMyStream
       summary: Get the stream of posts on a page.
       description: |-
         Get the stream of posts on a page.
-      parameters: 
-        - $ref: "#/components/parameters/UserId"
       responses:
         "200":
           description: Returns the user stream
@@ -181,14 +190,15 @@ paths:
         "500": {$ref: "#/components/responses/InternalServerError"}
 
   /posts/{postId}:
+    parameters: 
+      - $ref: "#/components/parameters/PostId"  
+
     delete:
       tags: ["post"]
       operationId: deletePhoto
       summary: Remove a post.
       description: |-
         Remove a post.
-      parameters: 
-        - $ref: "#/components/parameters/PostId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -196,28 +206,28 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /posts/{postId}/likes:
+    parameters: 
+      - $ref: "#/components/parameters/PostId"
+
     post:
-      tags: ["post"]
+      tags: ["like"]
       operationId: likePhoto
       summary: Like a post.
       description: |-
         Like a post.
-      parameters: 
-        - $ref: "#/components/parameters/PostId"
       responses:
+        "201": {$ref: "#/components/responses/Created"}
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest"}
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": {$ref: "#/components/responses/InternalServerError"}
       
     delete:
-      tags: ["post"]
+      tags: ["like"]
       operationId: unlikePhoto
       summary: Unlike a post.
       description: |-
         Unlike a post.
-      parameters: 
-        - $ref: "#/components/parameters/PostId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest"}
@@ -225,13 +235,11 @@ paths:
         "500": {$ref: "#/components/responses/InternalServerError"}
 
     get:
-      tags: ["post"]
+      tags: ["like"]
       operationId: getLikes
-      summary: Gets the list of user that liked the post.
+      summary: Gets the list of users that liked the post.
       description: |-
         Gets the list of user that liked the post. The user that blocked the requester will not be shown.
-      parameters: 
-        - $ref: "#/components/parameters/PostId"
       responses:
         "200":
           description: Returns the list of users that liked the post.
@@ -243,14 +251,15 @@ paths:
         "500": {$ref: "#/components/responses/InternalServerError"}
 
   /posts/{postId}/comments:
+    parameters: 
+      - $ref: "#/components/parameters/PostId"
+
     post:
-      tags: ["post"]
+      tags: ["comment"]
       operationId: commentPhoto
       summary: Comment a post.
       description: |-
         Comment a post.
-      parameters: 
-        - $ref: "#/components/parameters/PostId"
       requestBody:
         description: Comment details
         content:
@@ -268,13 +277,11 @@ paths:
         "500": {$ref: "#/components/responses/InternalServerError"}
 
     get:
-      tags: ["post"]
+      tags: ["comment"]
       operationId: getComments
       summary: Gets the list of comments.
       description: |-
         Gets the list of comments. The user that blocked the requester will not be shown.
-      parameters: 
-        - $ref: "#/components/parameters/PostId"
       responses:
         "200":
           description: Returns the list of comment related to the requested post.
@@ -286,15 +293,16 @@ paths:
         "500": {$ref: "#/components/responses/InternalServerError"}
 
   /posts/{postId}/comments/{commentId}:
+    parameters: 
+      - $ref: "#/components/parameters/PostId"
+      - $ref: "#/components/parameters/CommentId"
+
     delete:
-      tags: ["post"]
+      tags: ["comment"]
       operationId: uncommentPhoto
       summary: Uncomment a post.
       description: |-
         Uncomment a post.
-      parameters: 
-        - $ref: "#/components/parameters/PostId"
-        - $ref: "#/components/parameters/CommentId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest"}
@@ -303,14 +311,15 @@ paths:
         "500": {$ref: "#/components/responses/InternalServerError"}
 
   /block/{userId}:
+    parameters: 
+      - $ref: "#/components/parameters/UserId" 
+
     put:
       tags: ["block"]
       operationId: banUser
       summary: Blocks the requested user.
       description: |-
         Blocks the requested user.
-      parameters: 
-        - $ref: "#/components/parameters/UserId" 
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -323,8 +332,6 @@ paths:
       summary: Unlocks the requested user.
       description: |-
         Unlocks the requested user.
-      parameters: 
-        - $ref: "#/components/parameters/UserId"
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -349,14 +356,15 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /follow/{userId}:
+    parameters: 
+      - $ref: "#/components/parameters/UserId" 
+
     put:
       tags: ["follow"]
       operationId: followUser
       summary: Follows a user.
       description: |-
         Follows the user specified with the UserId.
-      parameters: 
-        - $ref: "#/components/parameters/UserId" 
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -370,8 +378,6 @@ paths:
       summary: Unfollows a user.
       description: |-
         Unfollows the user specified with the UserId.
-      parameters: 
-        - $ref: "#/components/parameters/UserId" 
       responses:
         "204": { $ref: "#/components/responses/NoContent" } #unfollowed the user
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -380,14 +386,15 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /followers/{userId}:
+    parameters: 
+      - $ref: "#/components/parameters/UserId" 
+
     get:
       tags: ["follow"]
       operationId: getFollowers
       summary: Gets the list of followers.
       description: |-
         Gets the list of followers. The user that blocked the requester will not be shown.
-      parameters: 
-        - $ref: "#/components/parameters/UserId" 
       responses:
         "200": 
           description: Returns the list of the users that follows the logged user.
@@ -399,14 +406,15 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /following/{userId}:
+    parameters: 
+      - $ref: "#/components/parameters/UserId" 
+
     get:
       tags: ["follow"]
       operationId: getFollowing
       summary: Gets the list of following.
       description: |-
         Gets the list of following. The user that blocked the requester will not be shown.
-      parameters: 
-        - $ref: "#/components/parameters/UserId" 
       responses:
         "200": 
           description: Returns the list of the users that the logged user follows.
@@ -432,30 +440,37 @@ components:
   schemas:
     User:
       description: |
-        The Users entity.
+        The Users entity. Applies to current and requested users.
       type: object
       properties:
         userId:
           type: integer
           example: 1
+          description: userId
         username:
           type: string
           example: "Username"
+          description: the username 
         numberOfFollowers:
           type: integer
           example: 0
+          description: followers
         accountsFollowed:
           type: integer
           example: 0
+          description: following
         numberOfPosts:
           type: integer
           example: 0
+          description: number of posts
         isBlocked:
           type: boolean
           example: false
+          description: is the user blocked?
         isFollowed:
           type: boolean
           example: false
+          description: do you follow the user?
 
     UserReduced:
       description: |
@@ -465,17 +480,23 @@ components:
         userId:
           type: integer
           example: 1
+          description: userId
         username:
           type: string
           example: "Username"
+          description: the full username
 
     UserList:
-      type: array
       description: List of Users
+      type: array
+      minItems: 0
+      maxItems: 100
       items: 
         $ref: "#/components/schemas/UserReduced"
 
     Username:
+      description: |
+        The username, for searching.
       type: object
       properties:
         username:
@@ -484,6 +505,7 @@ components:
           pattern: '^[a-zA-Z][\.]{0,1}([\w][\.]{0,1})*[\w]$'
           minLength: 3
           maxLength: 25
+          description: username pattern
 
     Post:
       description: |
@@ -493,28 +515,37 @@ components:
         postId:
           type: integer
           example: 1
+          description: postId
         authorId:
           type: integer
           example: 1
+          description: the user who posted
         caption:
           type: string
           example: "My post"
+          description: the text under the post
         numberOfLikes:
           type: integer
           example: 0
+          description: quantity of likes
         numberOfComments:
           type: integer
           example: 0
+          description: quantity od comments
         timeOfCreation:
           type: string
           example: "2002-01-11T18:45:54.215500172Z"
+          description: time of creation of the post
         isliked:
           type: boolean
           example: false
+          description: is the post liked? hmmm...
 
     Stream:
-      type: array
       description: List of posts
+      type: array
+      minItems: 0
+      maxItems: 100
       items: 
         $ref: "#/components/schemas/Post"
 
@@ -536,31 +567,36 @@ components:
 
     Comment: 
       description: A comment structure with Text, PostId and UserId.
-      type: array
-      items:
-        type: object
-        properties:
-          postId:
-            type: integer
-            example: 1
-          userId:
-            type: integer
-            example: 1
-          text:
-            type: string
-            pattern: ".*"
-            example: A beautiful sunset!
+      type: object
+      properties:
+        postId:
+          type: integer
+          example: 1
+          description: postId
+        userId:
+          type: integer
+          example: 1
+          description: userId
+        text:
+          type: string
+          pattern: ".*"
+          example: A beautiful sunset!
+          description: the text to include in the comment
 
     CommentList:
-      type: array
       description: List of comments
+      type: array
+      minItems: 0
+      maxItems: 100
       items: 
         $ref: "#/components/schemas/Comment"
     
     CommentRequest:
+      description: comment request
       type: object
       properties:
-        text: {$ref: "#/components/schemas/Text"}
+        text: 
+          $ref: "#/components/schemas/Text"
 
   parameters:
     UsernameQuery:
