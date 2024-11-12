@@ -316,7 +316,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": {$ref: "#/components/responses/InternalServerError"}
 
-  /blockuser/{userId}:
+  /blocked/{userId}:
     parameters: 
       - $ref: "#/components/parameters/UserId" 
 
@@ -345,7 +345,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /blockedlist: 
+  /blocked/: 
     get:
       tags: ["block"]
       operationId: getBlockedList
@@ -361,9 +361,46 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /followuser/{userId}:
+  /followers/{userId}:
     parameters: 
       - $ref: "#/components/parameters/UserId" 
+
+    get:
+      tags: ["follow"]
+      operationId: getFollowers
+      summary: Gets the list of followers.
+      description: |-
+        Gets the list of followers. The user that blocked the requester will not be shown.
+      responses:
+        "200": 
+          description: Returns the list of the users that follows the logged user.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserList" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+
+  /following/{userId}:
+    parameters: 
+      - $ref: "#/components/parameters/UserId" 
+
+    get:
+      tags: ["follow"]
+      operationId: getFollowingList
+      summary: Gets the list of following.
+      description: |-
+        Gets the list of following. The user that blocked the requester will not be shown.
+      responses:
+        "200": 
+          description: Returns the list of the users that the logged user follows.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserList" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
     put:
       tags: ["follow"]
@@ -389,46 +426,6 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /followers/{userId}:
-    parameters: 
-      - $ref: "#/components/parameters/UserId" 
-
-    get:
-      tags: ["follow"]
-      operationId: getFollowers
-      summary: Gets the list of followers.
-      description: |-
-        Gets the list of followers. The user that blocked the requester will not be shown.
-      responses:
-        "200": 
-          description: Returns the list of the users that follows the logged user.
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/UserList" }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /following/{userId}:
-    parameters: 
-      - $ref: "#/components/parameters/UserId" 
-
-    get:
-      tags: ["follow"]
-      operationId: getFollowing
-      summary: Gets the list of following.
-      description: |-
-        Gets the list of following. The user that blocked the requester will not be shown.
-      responses:
-        "200": 
-          description: Returns the list of the users that the logged user follows.
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/UserList" }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
 #-----------------------------
