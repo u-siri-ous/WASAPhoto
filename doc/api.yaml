@@ -205,23 +205,10 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /posts/{postId}/likes/: 
+  /posts/{postId}/likes/self: 
     parameters: 
       - $ref: "#/components/parameters/PostId"
 
-    post:
-      tags: ["like"]
-      operationId: likePhoto
-      summary: Like a post.
-      description: |-
-        Like a post.
-      responses:
-        "201": {$ref: "#/components/responses/Created"}
-        "204": { $ref: "#/components/responses/NoContent" }
-        "400": { $ref: "#/components/responses/BadRequest"}
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
-      
     get:
       tags: ["like"]
       operationId: getLikes
@@ -238,11 +225,19 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": {$ref: "#/components/responses/InternalServerError"}
 
-  /posts/{postId}/likes/{likeId}:
-    parameters: 
-      - $ref: "#/components/parameters/PostId"
-      - $ref: "#/components/parameters/LikeId"
-
+    post:
+      tags: ["like"]
+      operationId: likePhoto
+      summary: Like a post.
+      description: |-
+        Like a post.
+      responses:
+        "201": {$ref: "#/components/responses/Created"}
+        "204": { $ref: "#/components/responses/NoContent" }
+        "400": { $ref: "#/components/responses/BadRequest"}
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": {$ref: "#/components/responses/InternalServerError"}
+    
     delete:
       tags: ["like"]
       operationId: unlikePhoto
@@ -316,7 +311,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": {$ref: "#/components/responses/InternalServerError"}
 
-  /blockuser/{userId}:
+  /blocked/{userId}:
     parameters: 
       - $ref: "#/components/parameters/UserId" 
 
@@ -345,7 +340,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /blockedlist: 
+  /blocked/: 
     get:
       tags: ["block"]
       operationId: getBlockedList
@@ -359,36 +354,6 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/UserList" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /followuser/{userId}:
-    parameters: 
-      - $ref: "#/components/parameters/UserId" 
-
-    put:
-      tags: ["follow"]
-      operationId: followUser
-      summary: Follows a user.
-      description: |-
-        Follows the user specified with the UserId.
-      responses:
-        "204": { $ref: "#/components/responses/NoContent" }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-    delete:
-      tags: ["follow"]
-      operationId: unfollowUser
-      summary: Unfollows a user.
-      description: |-
-        Unfollows the user specified with the UserId.
-      responses:
-        "204": { $ref: "#/components/responses/NoContent" } #unfollowed the user
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /followers/{userId}:
@@ -417,7 +382,7 @@ paths:
 
     get:
       tags: ["follow"]
-      operationId: getFollowing
+      operationId: getFollowingList
       summary: Gets the list of following.
       description: |-
         Gets the list of following. The user that blocked the requester will not be shown.
@@ -429,6 +394,32 @@ paths:
               schema: { $ref: "#/components/schemas/UserList" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+    put:
+      tags: ["follow"]
+      operationId: followUser
+      summary: Follows a user.
+      description: |-
+        Follows the user specified with the UserId.
+      responses:
+        "204": { $ref: "#/components/responses/NoContent" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+    delete:
+      tags: ["follow"]
+      operationId: unfollowUser
+      summary: Unfollows a user.
+      description: |-
+        Unfollows the user specified with the UserId.
+      responses:
+        "204": { $ref: "#/components/responses/NoContent" } #unfollowed the user
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
 #-----------------------------
