@@ -205,23 +205,10 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /posts/{postId}/likes/: 
+  /posts/{postId}/likes/self: 
     parameters: 
       - $ref: "#/components/parameters/PostId"
 
-    post:
-      tags: ["like"]
-      operationId: likePhoto
-      summary: Like a post.
-      description: |-
-        Like a post.
-      responses:
-        "201": {$ref: "#/components/responses/Created"}
-        "204": { $ref: "#/components/responses/NoContent" }
-        "400": { $ref: "#/components/responses/BadRequest"}
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
-      
     get:
       tags: ["like"]
       operationId: getLikes
@@ -238,11 +225,19 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": {$ref: "#/components/responses/InternalServerError"}
 
-  /posts/{postId}/likes/{likeId}:
-    parameters: 
-      - $ref: "#/components/parameters/PostId"
-      - $ref: "#/components/parameters/LikeId"
-
+    post:
+      tags: ["like"]
+      operationId: likePhoto
+      summary: Like a post.
+      description: |-
+        Like a post.
+      responses:
+        "201": {$ref: "#/components/responses/Created"}
+        "204": { $ref: "#/components/responses/NoContent" }
+        "400": { $ref: "#/components/responses/BadRequest"}
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": {$ref: "#/components/responses/InternalServerError"}
+    
     delete:
       tags: ["like"]
       operationId: unlikePhoto
@@ -380,7 +375,6 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-
 
   /following/{userId}:
     parameters: 
