@@ -72,9 +72,9 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
   
-  /users:
+  /users/:
     parameters: 
-      - $ref: "#/components/parameters/UsernameQuery" 
+      - $ref: "#/components/parameters/UsernameQuery"
 
     get:
       tags: ["user"]
@@ -160,7 +160,7 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /posts:
+  /posts/: 
     post:
       tags: ["post"]
       operationId: uploadPhoto
@@ -183,8 +183,8 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Post" }
         "400": {$ref: "#/components/responses/BadRequest"}
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "404": { $ref: "#/components/responses/NotFound" }
+        "401": {$ref: "#/components/responses/Unauthorized" }
+        "404": {$ref: "#/components/responses/NotFound" }
         "413": {$ref: "#/components/responses/EntityTooLarge"}
         "415": {$ref: "#/components/responses/UnsupportedMediaType"}
         "500": {$ref: "#/components/responses/InternalServerError"}
@@ -205,7 +205,7 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /posts/{postId}/likes:
+  /posts/{postId}/likes/: 
     parameters: 
       - $ref: "#/components/parameters/PostId"
 
@@ -222,18 +222,6 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": {$ref: "#/components/responses/InternalServerError"}
       
-    delete:
-      tags: ["like"]
-      operationId: unlikePhoto
-      summary: Unlike a post.
-      description: |-
-        Unlike a post.
-      responses:
-        "204": { $ref: "#/components/responses/NoContent" }
-        "400": { $ref: "#/components/responses/BadRequest"}
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
-
     get:
       tags: ["like"]
       operationId: getLikes
@@ -250,7 +238,25 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": {$ref: "#/components/responses/InternalServerError"}
 
-  /posts/{postId}/comments:
+  /posts/{postId}/likes/{likeId}:
+    parameters: 
+      - $ref: "#/components/parameters/PostId"
+      - $ref: "#/components/parameters/LikeId"
+
+    delete:
+      tags: ["like"]
+      operationId: unlikePhoto
+      summary: Unlike a post.
+      description: |-
+        Unlike a post.
+      responses:
+        "204": { $ref: "#/components/responses/NoContent" }
+        "400": { $ref: "#/components/responses/BadRequest"}
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": {$ref: "#/components/responses/InternalServerError"}
+
+  /posts/{postId}/comments/:
     parameters: 
       - $ref: "#/components/parameters/PostId"
 
@@ -310,7 +316,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": {$ref: "#/components/responses/InternalServerError"}
 
-  /block/{userId}:
+  /blockuser/{userId}:
     parameters: 
       - $ref: "#/components/parameters/UserId" 
 
@@ -339,7 +345,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /blocked:
+  /blockedlist: 
     get:
       tags: ["block"]
       operationId: getBlockedList
@@ -355,7 +361,7 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /follow/{userId}:
+  /followuser/{userId}:
     parameters: 
       - $ref: "#/components/parameters/UserId" 
 
@@ -644,6 +650,17 @@ components:
         minimum: 0
       required: true
 
+    LikeId:
+      in: path
+      name: likeId
+      description: The EntityId of the like
+      schema:
+        type: integer
+        example: 1
+        maximum: 18446744073709551615 
+        minimum: 0
+      required: true
+
   responses:
     Created:
       description: The requested entity has been created
@@ -657,6 +674,16 @@ components:
       description: The server encountered an internal error. Further info in server logs.
     NotFound:
       description: The requested entity is not found.
+      content:
+        application/json:
+          schema:
+            description: returned error string
+            type: string
+            minLength: 0
+            maxLength: 60
+            pattern: ^[\S\s]{0,60}$ #(.*?)
+            example: "Content not found"
+      
     Forbidden:
       description: The operation is forbidden by the server.
     EntityTooLarge:
