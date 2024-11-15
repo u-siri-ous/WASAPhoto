@@ -655,14 +655,50 @@ components:
   responses:
     Created:
       description: The requested entity has been created
+      content:
+        application/json:
+          schema:
+            description: returned success string
+            type: string
+            minLength: 0
+            maxLength: 60
+            pattern: ^[\S\s]{0,60}$ #(.*?)
+            example: "Content created"  
     NoContent:
       description: The request ended successfully with no body
     Unauthorized:
       description: The access token is missing or it's expired
+      content:
+        application/json:
+          schema:
+            description: returned access denied string
+            type: string
+            minLength: 0
+            maxLength: 60
+            pattern: ^[\S\s]{0,60}$ #(.*?)
+            example: "The user is not authorized"  
     BadRequest:
       description: The request was not compliant with the documentation (eg. missing fields, etc)
+      content:
+        application/json:
+          schema:
+            description: returned bad request string
+            type: string
+            minLength: 0
+            maxLength: 60
+            pattern: ^[\S\s]{0,60}$ #(.*?)
+            example: "Request is not compliant with the documentation"  
     InternalServerError:
       description: The server encountered an internal error. Further info in server logs.
+      content:
+        application/json:
+          schema:
+            description: returned error string
+            type: string
+            minLength: 0
+            maxLength: 60
+            pattern: ^[\S\s]{0,60}$ #(.*?)
+            example: "Internal server error"
     NotFound:
       description: The requested entity is not found.
       content:
@@ -673,11 +709,37 @@ components:
             minLength: 0
             maxLength: 60
             pattern: ^[\S\s]{0,60}$ #(.*?)
-            example: "Content not found"
-      
+            example: "Content not found"  
     Forbidden:
       description: The operation is forbidden by the server.
+      content:
+        application/json:
+          schema:
+            description: returned forbidden string
+            type: string
+            minLength: 0
+            maxLength: 60
+            pattern: ^[\S\s]{0,60}$ #(.*?)
+            example: "Operation is forbidden"
     EntityTooLarge:
       description: The provided file is too large.
+      content:
+        application/json:
+          schema:
+            description: returned file error string
+            type: string
+            minLength: 0
+            maxLength: 60
+            pattern: ^[\S\s]{0,60}$ #(.*?)
+            example: "The file is too large"  
     UnsupportedMediaType:
       description: The file type is unsupported. Provide a jpg or png file. 
+      content:
+        application/json:
+          schema:
+            description: returned file error string
+            type: string
+            minLength: 0
+            maxLength: 60
+            pattern: ^[\S\s]{0,60}$ #(.*?)
+            example: "The file type is unsupported"
