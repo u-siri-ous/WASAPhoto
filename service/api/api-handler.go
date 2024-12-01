@@ -15,8 +15,8 @@ func (rt *_router) Handler() http.Handler {
 	// Settings
 	rt.router.PUT("/settings/username", rt.wrap(rt.SetUsername, true))
 	// Block
-	rt.router.PUT("/block/:userId", rt.wrap(rt.BlockUser, true))
-	rt.router.DELETE("/block/:userId", rt.wrap(rt.UnblockUser, true))
+	rt.router.PUT("/blocked/:userId", rt.wrap(rt.BlockUser, true))
+	rt.router.DELETE("/blocked/:userId", rt.wrap(rt.UnblockUser, true))
 	rt.router.GET("/blocked/", rt.wrap(rt.BlockedUsers, true))
 	// Follow
 	rt.router.GET("/followers/:userId", rt.wrap(rt.GetFollowers, true))
@@ -29,8 +29,12 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/posts/:postId/likes/self", rt.wrap(rt.Likes, true))
 	rt.router.POST("/posts/:postId/likes/self", rt.wrap(rt.LikePost, true))
 	rt.router.DELETE("/posts/:postId/likes/self", rt.wrap(rt.UnlikePost, true))
+	rt.router.GET("/posts/:postId/comments/", rt.wrap(rt.Comments, true))
 	rt.router.POST("/posts/:postId/comments/", rt.wrap(rt.CommentPost, true))
 	rt.router.DELETE("/posts/:postId/comments/:commentId", rt.wrap(rt.DeleteCommentPost, true))
+
+	// Liveness check
+	rt.router.GET("/liveness", rt.liveness)
 
 	return rt.router
 }

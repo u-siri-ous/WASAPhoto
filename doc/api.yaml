@@ -21,11 +21,11 @@ tags:
     description: Operations related to session management.
 
   - name: user
-    description: Operations related to profile management and users' search.  
-  
+    description: Operations related to profile management and users' search.
+
   - name: block
-    description: Operations related to the blocks handling. 
-    
+    description: Operations related to the blocks handling.
+
   - name: follow
     description: Operations related to followers and following.
 
@@ -39,7 +39,7 @@ tags:
     description: Operations related to management of comments.
 
   - name: settings
-    description: Operations related to the user settings 
+    description: Operations related to the user settings
 
 #-----------------------------
 
@@ -64,16 +64,16 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UserReduced" }
-        "201": 
+        "201":
           description: User created and logged in, returns the user identifier as token.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UserReduced" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-  
+
   /users/:
-    parameters: 
+    parameters:
       - $ref: "#/components/parameters/UsernameQuery"
 
     get:
@@ -94,8 +94,8 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /users/{userId}:
-    parameters: 
-      - $ref: "#/components/parameters/UserId" 
+    parameters:
+      - $ref: "#/components/parameters/UserId"
 
     get:
       tags: ["user"]
@@ -117,7 +117,7 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /users/{userId}/stream:
-    parameters: 
+    parameters:
       - $ref: "#/components/parameters/UserId"
 
     get:
@@ -132,10 +132,10 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Stream" }
-        "400": { $ref: "#/components/responses/BadRequest"}
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
-        
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
   /settings/username:
     put:
       tags: ["settings"]
@@ -150,7 +150,7 @@ paths:
           application/json:
             schema: { $ref: "#/components/schemas/Username" }
       responses:
-        "200": 
+        "200":
           description: Username modified.
           content:
             application/json:
@@ -160,13 +160,13 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /posts/: 
+  /posts/:
     post:
       tags: ["post"]
       operationId: uploadPhoto
       summary: Upload a photo.
       description: |-
-        Upload a photo. 
+        Upload a photo.
       requestBody:
         content:
           multipart/form-data:
@@ -177,21 +177,21 @@ paths:
                 photo: { $ref: "#/components/schemas/Photo" }
                 caption: { $ref: "#/components/schemas/Text" }
       responses:
-        "201": 
+        "201":
           description: Post created.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Post" }
-        "400": {$ref: "#/components/responses/BadRequest"}
-        "401": {$ref: "#/components/responses/Unauthorized" }
-        "404": {$ref: "#/components/responses/NotFound" }
-        "413": {$ref: "#/components/responses/EntityTooLarge"}
-        "415": {$ref: "#/components/responses/UnsupportedMediaType"}
-        "500": {$ref: "#/components/responses/InternalServerError"}
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "413": { $ref: "#/components/responses/EntityTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /posts/{postId}:
-    parameters: 
-      - $ref: "#/components/parameters/PostId"  
+    parameters:
+      - $ref: "#/components/parameters/PostId"
 
     delete:
       tags: ["post"]
@@ -205,8 +205,8 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /posts/{postId}/likes/self: 
-    parameters: 
+  /posts/{postId}/likes/self:
+    parameters:
       - $ref: "#/components/parameters/PostId"
 
     get:
@@ -221,9 +221,9 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UserList" }
-        "400": { $ref: "#/components/responses/BadRequest"}
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
     post:
       tags: ["like"]
@@ -232,12 +232,12 @@ paths:
       description: |-
         Like a post.
       responses:
-        "201": {$ref: "#/components/responses/Created"}
+        "201": { $ref: "#/components/responses/Created" }
         "204": { $ref: "#/components/responses/NoContent" }
-        "400": { $ref: "#/components/responses/BadRequest"}
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
-    
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
     delete:
       tags: ["like"]
       operationId: unlikePhoto
@@ -246,13 +246,13 @@ paths:
         Unlike a post.
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
-        "400": { $ref: "#/components/responses/BadRequest"}
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /posts/{postId}/comments/:
-    parameters: 
+    parameters:
       - $ref: "#/components/parameters/PostId"
 
     post:
@@ -273,9 +273,9 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Comment" }
-        "400": { $ref: "#/components/responses/BadRequest"}
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
     get:
       tags: ["comment"]
@@ -289,12 +289,12 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CommentList" }
-        "400": { $ref: "#/components/responses/BadRequest"}
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /posts/{postId}/comments/{commentId}:
-    parameters: 
+    parameters:
       - $ref: "#/components/parameters/PostId"
       - $ref: "#/components/parameters/CommentId"
 
@@ -306,14 +306,14 @@ paths:
         Uncomment a post.
       responses:
         "204": { $ref: "#/components/responses/NoContent" }
-        "400": { $ref: "#/components/responses/BadRequest"}
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "500": {$ref: "#/components/responses/InternalServerError"}
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /blocked/{userId}:
-    parameters: 
-      - $ref: "#/components/parameters/UserId" 
+    parameters:
+      - $ref: "#/components/parameters/UserId"
 
     put:
       tags: ["block"]
@@ -340,7 +340,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /blocked/: 
+  /blocked/:
     get:
       tags: ["block"]
       operationId: getBlockedList
@@ -348,7 +348,7 @@ paths:
       description: |-
         Gets the list of blocked users.
       responses:
-        "200": 
+        "200":
           description: Returns the list of the blocked users.
           content:
             application/json:
@@ -357,8 +357,8 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /followers/{userId}:
-    parameters: 
-      - $ref: "#/components/parameters/UserId" 
+    parameters:
+      - $ref: "#/components/parameters/UserId"
 
     get:
       tags: ["follow"]
@@ -367,7 +367,7 @@ paths:
       description: |-
         Gets the list of followers. The user that blocked the requester will not be shown.
       responses:
-        "200": 
+        "200":
           description: Returns the list of the users that follows the logged user.
           content:
             application/json:
@@ -377,8 +377,8 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /following/{userId}:
-    parameters: 
-      - $ref: "#/components/parameters/UserId" 
+    parameters:
+      - $ref: "#/components/parameters/UserId"
 
     get:
       tags: ["follow"]
@@ -387,7 +387,7 @@ paths:
       description: |-
         Gets the list of following. The user that blocked the requester will not be shown.
       responses:
-        "200": 
+        "200":
           description: Returns the list of the users that the logged user follows.
           content:
             application/json:
@@ -425,15 +425,14 @@ paths:
 #-----------------------------
 
 components:
-
   securitySchemes:
     bearerAuthentication:
       description: |
         User token that uses the entityId of the logged user.
         Done accordingly to the project specification
       type: http
-      scheme: bearer    
-      
+      scheme: bearer
+
   schemas:
     User:
       description: |
@@ -447,7 +446,7 @@ components:
         username:
           type: string
           example: "Username"
-          description: the username 
+          description: the username
         numberOfFollowers:
           type: integer
           example: 0
@@ -488,7 +487,7 @@ components:
       type: array
       minItems: 0
       maxItems: 100
-      items: 
+      items:
         $ref: "#/components/schemas/UserReduced"
 
     Username:
@@ -543,7 +542,7 @@ components:
       type: array
       minItems: 0
       maxItems: 100
-      items: 
+      items:
         $ref: "#/components/schemas/Post"
 
     Photo:
@@ -551,9 +550,9 @@ components:
       type: string
       format: binary
       pattern: "^[01]+$"
-      minLength: 4096     # 4kB
+      minLength: 4096 # 4kB
       maxLength: 10485760 # 10MB
-    
+
     Text:
       description: Generic text. All user-inserted text-blocks will have this format.
       type: string
@@ -562,10 +561,14 @@ components:
       minLength: 1
       maxLength: 255
 
-    Comment: 
+    Comment:
       description: A comment structure with Text, PostId and UserId.
       type: object
       properties:
+        commentId:
+          type: integer
+          example: 1
+          description: commentId
         postId:
           type: integer
           example: 1
@@ -585,14 +588,14 @@ components:
       type: array
       minItems: 0
       maxItems: 100
-      items: 
+      items:
         $ref: "#/components/schemas/Comment"
-    
+
     CommentRequest:
       description: comment request
       type: object
       properties:
-        text: 
+        text:
           $ref: "#/components/schemas/Text"
 
   parameters:
@@ -607,7 +610,7 @@ components:
         minLength: 3
         maxLength: 25
       required: true
-    
+
     UserId:
       in: path
       name: userId
@@ -615,7 +618,7 @@ components:
       schema:
         type: integer
         example: 1
-        maximum: 18446744073709551615 
+        maximum: 18446744073709551615
         minimum: 0
       required: true
 
@@ -626,7 +629,7 @@ components:
       schema:
         type: integer
         example: 1
-        maximum: 18446744073709551615 
+        maximum: 18446744073709551615
         minimum: 0
       required: true
 
@@ -637,18 +640,7 @@ components:
       schema:
         type: integer
         example: 1
-        maximum: 18446744073709551615 
-        minimum: 0
-      required: true
-
-    LikeId:
-      in: path
-      name: likeId
-      description: The EntityId of the like
-      schema:
-        type: integer
-        example: 1
-        maximum: 18446744073709551615 
+        maximum: 18446744073709551615
         minimum: 0
       required: true
 
@@ -663,7 +655,7 @@ components:
             minLength: 0
             maxLength: 60
             pattern: ^[\S\s]{0,60}$ #(.*?)
-            example: "Content created"  
+            example: "Content created"
     NoContent:
       description: The request ended successfully with no body
     Unauthorized:
@@ -676,7 +668,7 @@ components:
             minLength: 0
             maxLength: 60
             pattern: ^[\S\s]{0,60}$ #(.*?)
-            example: "The user is not authorized"  
+            example: "The user is not authorized"
     BadRequest:
       description: The request was not compliant with the documentation (eg. missing fields, etc)
       content:
@@ -687,7 +679,7 @@ components:
             minLength: 0
             maxLength: 60
             pattern: ^[\S\s]{0,60}$ #(.*?)
-            example: "Request is not compliant with the documentation"  
+            example: "Request is not compliant with the documentation"
     InternalServerError:
       description: The server encountered an internal error. Further info in server logs.
       content:
@@ -709,7 +701,7 @@ components:
             minLength: 0
             maxLength: 60
             pattern: ^[\S\s]{0,60}$ #(.*?)
-            example: "Content not found"  
+            example: "Content not found"
     Forbidden:
       description: The operation is forbidden by the server.
       content:
@@ -731,9 +723,9 @@ components:
             minLength: 0
             maxLength: 60
             pattern: ^[\S\s]{0,60}$ #(.*?)
-            example: "The file is too large"  
+            example: "The file is too large"
     UnsupportedMediaType:
-      description: The file type is unsupported. Provide a jpg or png file. 
+      description: The file type is unsupported. Provide a jpg or png file.
       content:
         application/json:
           schema:
