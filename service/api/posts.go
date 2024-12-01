@@ -259,6 +259,35 @@ func (rt *_router) CommentPost(w http.ResponseWriter, r *http.Request, ps httpro
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func (rt *_router) Comments(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	postToGetComments, requestError := strconv.ParseUint(ps.ByName("postId"), 10, 64)
+
+	if requestError != nil {
+		utility.LogWithError("Comments: error while parsing the request", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	postExists, checkPostError := rt.db.CheckPostId(postToGetComments)
+	if checkPostError != nil {
+		utility.LogWithError("Comments: error while checking the request", http.StatusInternalServerError, checkPostError, w, ctx)
+		return
+	}
+
+	if !postExists {
+		utility.LogWithField("Comments: the requested post does not exists", http.StatusNotFound, "postId", postToGetComments, w, ctx)
+		return
+	}
+
+	postCommentsResponse, getCommentsError := rt.db.GetCommentsPost(ctx.Uid, postToGetComments)
+	if getCommentsError != nil {
+		utility.LogWithError("Comments: error while getting the list of comments - GetCommentsPost", http.StatusInternalServerError, getCommentsError, w, ctx)
+		return
+	}
+
+	w.Header().Set("content-type", "application/json")
+	_ = json.NewEncoder(w).Encode(postCommentsResponse)
+}
+
 func (rt *_router) DeleteCommentPost(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	postId, requestError := strconv.ParseUint(ps.ByName("postId"), 10, 64)
 

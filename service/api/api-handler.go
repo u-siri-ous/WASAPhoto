@@ -29,6 +29,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/posts/:postId/likes/self", rt.wrap(rt.Likes, true))
 	rt.router.POST("/posts/:postId/likes/self", rt.wrap(rt.LikePost, true))
 	rt.router.DELETE("/posts/:postId/likes/self", rt.wrap(rt.UnlikePost, true))
+	rt.router.GET("/posts/:postId/comments/", rt.wrap(rt.Comments, true))
 	rt.router.POST("/posts/:postId/comments/", rt.wrap(rt.CommentPost, true))
 	rt.router.DELETE("/posts/:postId/comments/:commentId", rt.wrap(rt.DeleteCommentPost, true))
 

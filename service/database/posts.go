@@ -110,6 +110,32 @@ func (db *appdbimpl) DeleteLikePost(currentUserId uint64, postId uint64) error {
 	return err
 }
 
+func (db *appdbimpl) GetCommentsPost(currentUserId uint64, postId uint64) (structs.CommentList, error) {
+	var result structs.CommentList
+
+	const getCommentsQuery = "SELECT pComments.commentId, pComments.postId, pComments.userId, pComments.text FROM ( SELECT c.commentId, c.postId, c.userId, c.text FROM comments c LEFT JOIN posts cPosts ON cPosts.postId = ? WHERE cPosts.postId = c.postId) pComments LEFT JOIN blocks b ON b.blockerUserId = pComments.userId WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL"
+
+	rows, errors := db.c.Query(getCommentsQuery, postId, currentUserId)
+
+	if errors != nil {
+		return result, errors
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var comment structs.Comment
+		if err := rows.Scan(&comment.CommentId, &comment.PostId, &comment.UserId, &comment.Text); err != nil {
+			return result, err
+		}
+		result.Comments = append(result.Comments, comment)
+	}
+
+	if err := rows.Err(); err != nil {
+		return result, err
+	}
+	return result, errors
+}
+
 func (db *appdbimpl) InsertCommentPost(currentUserId uint64, postId uint64, text string) error {
 	const insertCommentQuery = "INSERT INTO comments (postId, userId, text) VALUES (?, ?, ?)"
 	const deleteCommentQuery = "DELETE FROM comments WHERE commentId = ? AND userId = ?"

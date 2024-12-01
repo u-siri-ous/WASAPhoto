@@ -75,6 +75,7 @@ type AppDatabase interface {
 	GetLikes(currentUserId uint64, postId uint64) (structs.UserList, error)
 	InsertLikePost(currentUserId uint64, postId uint64) error
 	DeleteLikePost(currentUserId uint64, postId uint64) error
+	GetCommentsPost(currentUserId uint64, postId uint64) (structs.CommentList, error)
 	InsertCommentPost(currentUserId uint64, postId uint64, text string) error
 	DeleteCommentPost(currentUserId uint64, postId uint64, commentId uint64) error
 	CheckCommentId(commentId uint64) (bool, error)
