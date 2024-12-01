@@ -565,6 +565,10 @@ components:
       description: A comment structure with Text, PostId and UserId.
       type: object
       properties:
+        commentId:
+          type: integer
+          example: 1
+          description: commentId
         postId:
           type: integer
           example: 1
