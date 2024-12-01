@@ -43,31 +43,31 @@ import (
 type AppDatabase interface {
 	GetName() (string, error)
 
-	//Authorization
+	// Authorization
 	CheckUserId(userId uint64) (bool, error)
 
-	//Login
+	// Login
 	InsertUser(username string) (uint64, bool, error)
 
-	//Search User
+	// Search User
 	SearchUsersByUsername(requesterUserId uint64, search string) (structs.UserList, error)
 	GetUser(currentUserId uint64, requestedUserId uint64) (structs.User, error)
 	CheckUsernameAvailability(newUsername string) (bool, error)
 	SetUsername(currentUserId uint64, newUsername string) error
 
-	//Ban
+	// Ban
 	BlockUser(userId uint64, userToBlockId uint64) error
 	UnblockUser(userId uint64, userToBlockId uint64) error
 	CheckBlock(userId uint64, userToCheckId uint64) (bool, error)
 	ListOfBlocker(userid uint64) (structs.UserList, error)
 
-	//Follow
+	// Follow
 	FollowUser(userId uint64, userToFollowId uint64) error
 	UnfollowUser(userId uint64, userToUnfollowId uint64) error
 	GetFollowers(currentUserId uint64, userId uint64) (structs.UserList, error)
 	GetFollowing(currentUserId uint64, userId uint64) (structs.UserList, error)
 
-	//Posts
+	// Posts
 	CreatePost(userId uint64, caption string, uploadTime time.Time) (uint64, error)
 	DeletePost(currentUserId uint64, postId uint64) error
 	CheckPostId(postId uint64) (bool, error)
