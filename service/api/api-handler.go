@@ -15,8 +15,8 @@ func (rt *_router) Handler() http.Handler {
 	// Settings
 	rt.router.PUT("/settings/username", rt.wrap(rt.SetUsername, true))
 	// Block
-	rt.router.PUT("/block/:userId", rt.wrap(rt.BlockUser, true))
-	rt.router.DELETE("/block/:userId", rt.wrap(rt.UnblockUser, true))
+	rt.router.PUT("/blocked/:userId", rt.wrap(rt.BlockUser, true))
+	rt.router.DELETE("/blocked/:userId", rt.wrap(rt.UnblockUser, true))
 	rt.router.GET("/blocked/", rt.wrap(rt.BlockedUsers, true))
 	// Follow
 	rt.router.GET("/followers/:userId", rt.wrap(rt.GetFollowers, true))
