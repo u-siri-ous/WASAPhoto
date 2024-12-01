@@ -32,5 +32,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/posts/:postId/comments/", rt.wrap(rt.CommentPost, true))
 	rt.router.DELETE("/posts/:postId/comments/:commentId", rt.wrap(rt.DeleteCommentPost, true))
 
+	// Liveness check
+	rt.router.GET("/liveness", rt.liveness)
+
 	return rt.router
 }
