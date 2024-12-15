@@ -11,3 +11,7 @@ type Post struct {
 	TimeOfCreation time.Time `json:"timeOfCreation"`
 	IsLiked        bool      `json:"isliked"`
 }
+
+type Stream struct {
+	Stream []Post `json:"stream"`
+}

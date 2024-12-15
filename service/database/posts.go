@@ -186,3 +186,29 @@ func (db *appdbimpl) CheckCommentId(commentId uint64) (bool, error) {
 
 	return response, responseError
 }
+
+func (db *appdbimpl) GetPosts(currentUserId uint64, userToGetStream uint64) (structs.Stream, error) {
+	var result structs.Stream
+
+	const getPostsQuery = "SELECT p.*, CASE l.userId WHEN ? THEN TRUE ELSE FALSE END AS IsLiked FROM posts p LEFT JOIN likes l ON l.userId = ? AND l.likedPostId = p.postId  LEFT JOIN blocks b ON b.blockerUserId = p.userId WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL AND p.userId = ?"
+
+	rows, errors := db.c.Query(getPostsQuery, currentUserId, currentUserId, currentUserId, userToGetStream)
+
+	if errors != nil {
+		return result, errors
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var post structs.Post
+		if err := rows.Scan(&post.Id, &post.Author, &post.Caption, &post.Likes, &post.Comments, &post.TimeOfCreation, &post.IsLiked); err != nil {
+			return result, err
+		}
+		result.Stream = append(result.Stream, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return result, err
+	}
+	return result, errors
+}

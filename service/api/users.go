@@ -74,3 +74,34 @@ func (rt *_router) GetUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	w.Header().Set("content-type", "application/json")
 	_ = json.NewEncoder(w).Encode(userRequested)
 }
+
+func (rt *_router) GetStream(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	userToGetStream, requestErrors := strconv.ParseUint(ps.ByName("userId"), 10, 64)
+
+	if requestErrors != nil {
+		utility.LogWithError("GetStream: error while parsing request", http.StatusBadRequest, requestErrors, w, ctx)
+		return
+	}
+
+	userExists, checkErrors := rt.db.CheckUserId(userToGetStream)
+
+	if checkErrors != nil {
+		utility.LogWithError("GetStream: error while checking the requested user on the database - CheckUserId", http.StatusInternalServerError, checkErrors, w, ctx)
+		return
+	}
+
+	if !userExists {
+		utility.LogWithField("GetStream: the requested user does not exists!", http.StatusNotFound, "userId", userToGetStream, w, ctx)
+		return
+	}
+
+	streamRequested, requestError := rt.db.GetPosts(ctx.Uid, userToGetStream)
+
+	if requestError != nil {
+		utility.LogWithError("GetStream: error while getting the requested stream - GetPosts", http.StatusInternalServerError, requestError, w, ctx)
+		return
+	}
+
+	w.Header().Set("content-type", "application/json")
+	_ = json.NewEncoder(w).Encode(streamRequested)
+}

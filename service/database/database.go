@@ -79,6 +79,7 @@ type AppDatabase interface {
 	InsertCommentPost(currentUserId uint64, postId uint64, text string) error
 	DeleteCommentPost(currentUserId uint64, postId uint64, commentId uint64) error
 	CheckCommentId(commentId uint64) (bool, error)
+	GetPosts(currentUserId uint64, userToGetStream uint64) (structs.Stream, error)
 
 	Ping() error
 }
