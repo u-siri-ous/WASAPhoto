@@ -12,6 +12,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/users/", rt.wrap(rt.SearchUsers, true))
 	// Get User
 	rt.router.GET("/users/:userId", rt.wrap(rt.GetUser, true))
+	// Get Stream
+	rt.router.GET("/users/:userId/stream", rt.wrap(rt.GetStream, true))
 	// Settings
 	rt.router.PUT("/settings/username", rt.wrap(rt.SetUsername, true))
 	// Block
