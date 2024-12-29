@@ -2,7 +2,36 @@
 import { RouterLink, RouterView } from 'vue-router'
 </script>
 <script>
-export default {}
+const authToken = sessionStorage.getItem('authToken');
+export default {
+	data() {
+		return {
+			username: null,
+			loggedpath: "/users/" + authToken,
+			streampath: "/users/" + authToken + "/stream/",
+		}
+	},
+	async mounted() {
+		this.username = sessionStorage.getItem('username');
+		if (this.username === null) {
+			this.$router.push('/login');
+		}
+		else {
+			if (localStorage.getItem('loggedIn')) {
+				// localStorage.removeItem('loggedIn');
+				// this.$router.push('/users/' + sessionStorage.getItem('userId'));
+			}
+		}
+    },
+	methods: {
+		logout() {
+			console.log("LOGOUT");
+			localStorage.clear();
+			sessionStorage.clear();
+			location.reload();
+		},
+	},
+}
 </script>
 
 <template>
@@ -22,37 +51,34 @@ export default {}
 						<span>General</span>
 					</h6>
 					<ul class="nav flex-column">
-						<li class="nav-item">
+						<li v-if="username===null" class="nav-item">
 							<RouterLink to="/" class="nav-link">
 								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#home"/></svg>
-								Home
-							</RouterLink>
-						</li>
-						<li class="nav-item">
-							<RouterLink to="/link1" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#layout"/></svg>
-								Menu item 1
-							</RouterLink>
-						</li>
-						<li class="nav-item">
-							<RouterLink to="/link2" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#key"/></svg>
-								Menu item 2
+								Login
 							</RouterLink>
 						</li>
 					</ul>
 
-					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-						<span>Secondary menu</span>
-					</h6>
-					<ul class="nav flex-column">
-						<li class="nav-item">
-							<RouterLink :to="'/some/' + 'variable_here' + '/path'" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#file-text"/></svg>
-								Item 1
-							</RouterLink>
-						</li>
-					</ul>
+					<div v-if="username!==null">
+						<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+							<span>Actions</span>
+						</h6>
+						<ul class="nav flex-column">
+							<li class="nav-item">
+								<RouterLink :to="loggedpath" class="nav-link">
+									<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#file-text"/></svg>
+									{{ username }}
+								</RouterLink>
+							</li>
+
+							<li class="nav-item">
+								<RouterLink to="/logout" @click="logout" class="nav-link">
+									<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#file-text"/></svg>
+									Logout
+								</RouterLink>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</nav>
 
