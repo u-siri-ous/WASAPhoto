@@ -83,29 +83,28 @@ export default {
             const token = sessionStorage.getItem('authToken');
             const userId = this.$route.params.userId;
             try {
-                const response = await this.$axios.get(`/users/${userId}`, {
+                const getUserResponse = await this.$axios.get(`/users/${userId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
                 });
 
                 this.found = true;
-                this.userName = response.data.username;
-                this.followCount = response.data.numberOfFollowers;
-                this.followedCount = response.data.accountsFollowed;
-                this.photoCount = response.data.numberOfPosts;
-                this.isBanned = response.data.isBlocked;
-                this.isFollowed = response.data.isFollowed;
+                this.userName = getUserResponse.data.username;
+                this.followCount = getUserResponse.data.numberOfFollowers;
+                this.followedCount = getUserResponse.data.accountsFollowed;
+                this.photoCount = getUserResponse.data.numberOfPosts;
+                this.isBanned = getUserResponse.data.isBlocked;
+                this.isFollowed = getUserResponse.data.isFollowed;
 
-                const response1 = await this.$axios.get(`/users/${userId}/photos/`, {
+                const getStreamResponse = await this.$axios.get(`/users/${userId}/stream`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });
 
-                this.photoList = response1.data.posts;
-                console.log(this.photoList)
+                this.photoList = getStreamResponse.data.stream;
 
             } catch (error) {
                 if (error.response) {

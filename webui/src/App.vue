@@ -66,14 +66,14 @@ export default {
 						<ul class="nav flex-column">
 							<li class="nav-item">
 								<RouterLink :to="loggedpath" class="nav-link">
-									<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#file-text"/></svg>
+									<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#user"/></svg>
 									{{ username }}
 								</RouterLink>
 							</li>
 
 							<li class="nav-item">
 								<RouterLink to="/logout" @click="logout" class="nav-link">
-									<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#file-text"/></svg>
+									<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#log-out"/></svg>
 									Logout
 								</RouterLink>
 							</li>
