@@ -10,7 +10,7 @@
                                 <use href="/feather-sprite-v4.29.0.svg#user-plus" />
                             </svg>
                         </button>
-                        <button @click="toggleBan" class="btn btn-danger">
+                        <button @click="toggleBlock" class="btn btn-danger">
                             {{ isBanned ? 'Unban' : 'Ban' }} <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#slash" />
                             </svg>
@@ -28,15 +28,15 @@
 
         </div>
         <hr />
-        <!-- <div class="photos">
-            <PhotoCard v-for="photo in photoList" :key="photo.photoId" :photoId="photo.photoId" :date="photo.creation"
-                :authorName="photo.author.username" :likes="photo.numberOfLikes" :caption="photo.caption" :Liked="photo.isliked"/>
-        </div> -->
+        <div class="photos">
+            <PostCard v-for="photo in photoList" :key="photo.photoId" :photoId="photo.photoId" :date="photo.timeOfCreation"
+                :authorName="photo.author" :likes="photo.numberOfLikes" :caption="photo.caption" :isLiked="photo.isliked"/>
+        </div>
     </div>
 </template>
   
 <script>
-// import PhotoCard from '@/components/PhotoCard.vue';
+import PostCard from '../components/PostCard.vue';
 const token = sessionStorage.getItem('authToken');
 
 export default {
@@ -147,7 +147,7 @@ export default {
             try {
                 if (this.isFollowed) {
                     this.followCount += 1;
-                    await this.$axios.put(`/followed_users/${userId}`, {
+                    await this.$axios.put(`/following/${userId}`, {
                     }, {
                         headers: {
                             Authorization: `Bearer ${token}`
@@ -155,7 +155,7 @@ export default {
                     });
                 } else {
                     this.followCount -= 1;
-                    await this.$axios.delete(`/followed_users/${userId}`, {
+                    await this.$axios.delete(`/following/${userId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
@@ -166,7 +166,7 @@ export default {
             }
 
         },
-        async toggleBan() {
+        async toggleBlock() {
             // frontend
             this.isBanned = !this.isBanned;
             // backend
@@ -174,14 +174,14 @@ export default {
             const token = sessionStorage.getItem('authToken');
             try {
                 if (this.isBanned) {
-                    await this.$axios.put(`/banned_users/${userId}`, {
+                    await this.$axios.put(`/blocked/${userId}`, {
                     }, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     });
                 } else {
-                    await this.$axios.delete(`/banned_users/${userId}`, {
+                    await this.$axios.delete(`/blocked/${userId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
@@ -189,13 +189,13 @@ export default {
 
                 }
             } catch (error) {
-                console.error(error, "Error modifying ban status.")
+                console.error(error, "Error during the block operation.")
             }
         },
     },
-    // components: {
-    //     PhotoCard,
-    // },
+    components: {
+        PostCard,
+    },
 };
 </script>
   
