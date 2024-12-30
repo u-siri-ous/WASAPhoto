@@ -24,7 +24,7 @@ func (db *appdbimpl) CreatePost(currentUserId uint64, caption string, uploadTime
 
 func (db *appdbimpl) DeletePost(currentUserId uint64, postId uint64) error {
 	const deletePostQuery = "DELETE FROM posts WHERE postId = ? AND userId = ?"
-	_, err := db.c.Exec(deletePostQuery, currentUserId, postId)
+	_, err := db.c.Exec(deletePostQuery, postId, currentUserId)
 
 	return err
 }
