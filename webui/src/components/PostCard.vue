@@ -14,7 +14,7 @@
                     <div class="card-text text-center bg-light fs-5">{{ caption }}</div>
                     <div class="actions">
                         <button @click="likePhoto" class="btn btn-sm btn-outline-primary ms-3">
-                            {{ isLiked ? 'Unlike' : 'Like' }}
+                            {{ Liked ? 'Unlike' : 'Like' }}
                         </button>
                         <span class="like-counter">{{ LikeCount }} Likes <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#thumbs-up" />
@@ -25,14 +25,18 @@
                                 <use href="/feather-sprite-v4.29.0.svg#message-circle" />
                             </svg>
                         </button>
-                        <button @click="viewComments" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
-                            :data-bs-target="'#listModal' + modalId">
+                        <button @click="viewComments" class="btn btn-sm btn-outline-secondary">
                             View Comments <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#message-square" />
                             </svg>
                         </button>
-                        <!-- <CommentModal :photoId="this.modalId" />
-              <CommentListModal :photoId="this.modalId" /> -->
+                        <!-- <CommentModal :photoId="this.modalId" /> -->
+                    </div>
+                    <div class="comments">
+                        <div v-if="showComments" v-for="comment in photoComments" :key="comment.commentId" class="comment">
+                                <div class="comment-author">{{ comment.userId }}</div>
+                                <div class="comment-text">{{ comment.text }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -43,13 +47,11 @@
 
 <script>
 // import CommentModal from '@/components/CommentModal.vue';
-// import CommentListModal from '@/components/CommentListModal.vue';
 
 const token = sessionStorage.getItem('authToken');
 export default {
     components: {
         // CommentModal,
-        // CommentListModal,
     },
     props: {
         photoId: Number,
@@ -65,9 +67,11 @@ export default {
             isMe: false,
             imgSrc: null,
             notBanned: true,
-            isLiked: this.isLiked,
+            Liked: this.isLiked,
             LikeCount: this.likes,
             modalId: String(this.photoId),
+            showComments: false,
+            photoComments: [],
         };
     },
     async mounted() {
@@ -127,7 +131,7 @@ export default {
         },
         async deletePhoto() {
             try {
-                const response = await this.$axios.delete(`/posts/${this.photoId}`, {
+                await this.$axios.delete(`/posts/${this.photoId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     }
@@ -139,32 +143,42 @@ export default {
             }
         },
         async likePhoto() {
-            // backend
             try {
-                console.log("IS LIKED? pre", this.isLiked);
-                const token = sessionStorage.getItem('authToken');
-                if (!this.isLiked) {
+                if (!this.Liked) {
                     await this.$axios.post(`/posts/${this.photoId}/likes/self`, {
                     }, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     });
-                    this.isLiked = true;
                 } else {
                     await this.$axios.delete(`/posts/${this.photoId}/likes/self`, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     });
-                    this.isLiked = false;
                 }
-                this.LikeCount = this.isLiked ? this.LikeCount - 1 : this.LikeCount + 1;
-                console.log("IS LIKED? post", this.isLiked);
+                this.LikeCount = this.Liked ? this.LikeCount - 1 : this.LikeCount + 1;
+                this.Liked = !this.Liked;
             } catch (error) {
                 console.error(error, "Error during the likes operation.")
             }
         },
+        async viewComments() {
+            try {
+                this.showComments = !this.showComments;
+                if (this.showComments) {
+                    const response = await this.$axios.get(`/posts/${this.photoId}/comments/`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    this.photoComments = response.data.comments !== null ? response.data.comments : [];
+                }
+            } catch (error) {
+                console.error(error, "Error during the comments operation.")
+            }
+        }
     },
 };
 </script>
@@ -194,10 +208,39 @@ export default {
     margin-bottom: 5px;
 }
 
-.actions {
+.actions{
     display: flex;
     justify-content: space-between;
     margin: 15px;
+}
+
+.comments {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+    max-width: 400px; 
+    margin: 0 auto; 
+}
+
+.comment {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    text-align: right;
+}
+
+.comment-author {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.comment-text {
+    color: #555;
+    line-height: 1.5;
 }
 
 .like-counter {
