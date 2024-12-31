@@ -93,7 +93,7 @@ func (db *appdbimpl) GetUser(currentUserId uint64, requestedUserId uint64) (stru
 			u.username,
 			COUNT(DISTINCT f1.followerUserId) as numberOfFollowers,
 			COUNT(DISTINCT f2.followedUserId) as accountsFollowed,
-			COUNT(DISTINCT p.userId) as numberOfPosts,
+			COUNT(DISTINCT p.postId) as numberOfPosts,
 			MAX(CASE 
         		WHEN f3.followerUserId = ? THEN 1 
         		ELSE 0 
