@@ -31,7 +31,7 @@ func (rt *_router) CreatePost(w http.ResponseWriter, r *http.Request, ps httprou
 	defer photo.Close()
 
 	if photoHeader.Header.Get("Content-Type") != storage.AllowedMimeType {
-		utility.LogError("CreatePost: unsupported file", http.StatusUnsupportedMediaType, w, ctx)
+		utility.LogError("CreatePost: unsupported file: "+photoHeader.Header.Get("Content-Type"), http.StatusUnsupportedMediaType, w, ctx)
 		return
 	}
 
