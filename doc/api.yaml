@@ -577,6 +577,13 @@ components:
           type: integer
           example: 1
           description: userId
+        authorUsername:
+          type: string
+          example: User
+          description: the text to include in the comment
+          pattern: '^[a-zA-Z][\.]{0,1}([\w][\.]{0,1})*[\w]$'
+          minLength: 3
+          maxLength: 25
         text:
           type: string
           pattern: ".*"

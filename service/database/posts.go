@@ -113,7 +113,7 @@ func (db *appdbimpl) DeleteLikePost(currentUserId uint64, postId uint64) error {
 func (db *appdbimpl) GetCommentsPost(currentUserId uint64, postId uint64) (structs.CommentList, error) {
 	var result structs.CommentList
 
-	const getCommentsQuery = "SELECT pComments.commentId, pComments.postId, pComments.userId, pComments.text FROM ( SELECT c.commentId, c.postId, c.userId, c.text FROM comments c LEFT JOIN posts cPosts ON cPosts.postId = ? WHERE cPosts.postId = c.postId) pComments LEFT JOIN blocks b ON b.blockerUserId = pComments.userId WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL"
+	const getCommentsQuery = "SELECT pComments.commentId, pComments.postId, pComments.userId, u.username as authorUsername, pComments.text FROM ( SELECT c.commentId, c.postId, c.userId, c.text FROM comments c LEFT JOIN posts cPosts ON cPosts.postId = ? WHERE cPosts.postId = c.postId ) pComments LEFT JOIN blocks b ON b.blockerUserId = pComments.userId LEFT JOIN users u ON u.id = pComments.userId WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL"
 
 	rows, errors := db.c.Query(getCommentsQuery, postId, currentUserId)
 
@@ -124,7 +124,7 @@ func (db *appdbimpl) GetCommentsPost(currentUserId uint64, postId uint64) (struc
 
 	for rows.Next() {
 		var comment structs.Comment
-		if err := rows.Scan(&comment.CommentId, &comment.PostId, &comment.UserId, &comment.Text); err != nil {
+		if err := rows.Scan(&comment.CommentId, &comment.PostId, &comment.UserId, &comment.AuthorUsername, &comment.Text); err != nil {
 			return result, err
 		}
 		result.Comments = append(result.Comments, comment)
