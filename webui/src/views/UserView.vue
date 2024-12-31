@@ -1,40 +1,50 @@
 <template>
-    <div class="container mt-5">
-        <h1 class="display-4" style="font-size: 50px;">{{ userName }}</h1>
-        <div v-if="found">
-            <div>
-                <div v-if="!isItMe">
-                    <div class="btn-group mt-1">
-                        <button @click="toggleFollow" class="btn btn-warning">
-                            {{ isFollowed ? 'Unfollow' : 'Follow' }} <svg class="feather">
-                                <use href="/feather-sprite-v4.29.0.svg#user-plus" />
-                            </svg>
-                        </button>
-                        <button @click="toggleBlock" class="btn btn-danger">
-                            {{ isBanned ? 'Unban' : 'Ban' }} <svg class="feather">
-                                <use href="/feather-sprite-v4.29.0.svg#slash" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div style="font-size: 20px;" class="container mt-2">
-                <div class="row bg-light p-4 shadow-lg">
-                    <div class="row">Followers: {{ followCount }}</div>
-                    <div class="row">Followed: {{ followedCount }}</div>
-                    <div class="row">Photos: {{ photoCount }}</div>
-                </div>
+    <div class="profile-container">
+        <h1 class="profile-username">{{ userName }}</h1>
+        
+        <div v-if="found" class="user-actions">
+            <div v-if="!isItMe" class="action-buttons">
+                <button @click="toggleFollow" class="btn col follow-btn">
+                    {{ isFollowed ? 'Unfollow' : 'Follow' }}
+                    <svg class="icon">
+                        <use href="/feather-sprite-v4.29.0.svg#user-plus" />
+                    </svg>
+                </button>
+                <button @click="toggleBlock" class="btn col block-btn">
+                    {{ isBanned ? 'Unban' : 'Ban' }}
+                    <svg class="icon">
+                        <use href="/feather-sprite-v4.29.0.svg#slash" />
+                    </svg>
+                </button>
             </div>
 
+            <div class="user-info">
+                <div class="info-card">
+                    <p><strong>Followers:</strong> {{ followCount }}</p>
+                    <p><strong>Followed:</strong> {{ followedCount }}</p>
+                    <p><strong>Photos:</strong> {{ photoCount }}</p>
+                </div>
+            </div>
         </div>
+
         <hr />
-        <div class="photos">
-            <PostCard v-for="photo in photoList" :key="photo.photoId" :photoId="photo.photoId" :date="photo.timeOfCreation"
-                :authorName="photo.author" :likes="photo.numberOfLikes" :caption="photo.caption" :isLiked="photo.isliked"/>
+
+        <div class="photo-gallery">
+            <PostCard 
+                v-for="photo in photoList" 
+                :key="photo.photoId" 
+                :photoId="photo.photoId" 
+                :date="photo.timeOfCreation" 
+                :authorName="photo.author" 
+                :likes="photo.numberOfLikes" 
+                :caption="photo.caption" 
+                :isLiked="photo.isliked" 
+            />
         </div>
     </div>
 </template>
-  
+
+
 <script>
 import PostCard from '../components/PostCard.vue';
 const token = sessionStorage.getItem('authToken');
@@ -200,23 +210,89 @@ export default {
 </script>
   
 <style scoped>
-.user-info {
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.profile-username {
+    font-size: 2.5rem;
+    font-weight: bold;
     text-align: center;
-    font-size: 20px;
+    margin-bottom: 20px;
+    color: #333;
 }
 
-hr {
-    margin: 20px 0;
+.user-actions {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-.photos {
+.action-buttons {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.photos .photo-card {
-    margin-bottom: 30px;
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+}
+
+.follow-btn {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.follow-btn:hover {
+    background-color: #e0a800;
+}
+
+.block-btn {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.block-btn:hover {
+    background-color: #c82333;
+}
+
+.user-info {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.info-card p {
+    margin: 0;
+    font-size: 1rem;
+    color: #555;
+}
+
+.photo-gallery {
+    display: block;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 5px;
 }
 </style>
   

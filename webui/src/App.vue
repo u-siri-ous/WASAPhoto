@@ -18,8 +18,8 @@ export default {
 		}
 		else {
 			if (localStorage.getItem('loggedIn')) {
-				// localStorage.removeItem('loggedIn');
-				// this.$router.push('/users/' + sessionStorage.getItem('userId'));
+				localStorage.removeItem('loggedIn');
+				this.$router.push('/users/' + sessionStorage.getItem('userId'));
 			}
 		}
     },
@@ -55,6 +55,12 @@ export default {
 							<RouterLink to="/" class="nav-link">
 								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#home"/></svg>
 								Login
+							</RouterLink>
+						</li>
+						<li v-if="username!==null" class="nav-item">
+							<RouterLink :to="'/users/'" class="nav-link">
+								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#search"/></svg>
+								Explore Users
 							</RouterLink>
 						</li>
 					</ul>
