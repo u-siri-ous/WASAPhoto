@@ -73,10 +73,15 @@ export default {
 							<li class="nav-item">
 								<RouterLink :to="loggedpath" class="nav-link">
 									<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#user"/></svg>
-									{{ username }}
+									Profile
 								</RouterLink>
 							</li>
-
+							<li class="nav-item">
+								<RouterLink to="/settings" class="nav-link">
+									<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#settings"/></svg>
+									Settings
+								</RouterLink>
+							</li>
 							<li class="nav-item">
 								<RouterLink to="/logout" @click="logout" class="nav-link">
 									<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#log-out"/></svg>
