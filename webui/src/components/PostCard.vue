@@ -1,7 +1,7 @@
 <template>
     <div class="container mt-5" v-if="notBanned">
         <div class="center-container">
-            <div class="card photo-card">
+            <div class="card photo-card p-4 w-75">
                 <button v-if="isMe" @click="deletePhoto" class="btn btn-danger delete-button mb-2">
                     Delete Photo <svg class="feather">
                         <use href="/feather-sprite-v4.29.0.svg#trash-2" />
@@ -13,29 +13,38 @@
                     <div class="author">{{ authorName }}, {{ formattedDate }}</div>
                     <div class="card-text text-center bg-light fs-5">{{ caption }}</div>
                     <div class="actions">
-                        <button @click="likePhoto" class="btn btn-sm btn-outline-primary ms-3">
+                        <button @click="likePhoto" class="btn btn-sm btn-outline-primary">
                             {{ Liked ? 'Unlike' : 'Like' }}
                         </button>
-                        <span class="like-counter">{{ LikeCount }} Likes <svg class="feather">
+                        <span class="like-counter">
+                            {{ LikeCount }} Likes <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#thumbs-up" />
-                            </svg></span>
-                        <button @click="commentPhoto" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
-                            :data-bs-target="'#usersModal' + modalId">
-                            Comment <svg class="feather">
-                                <use href="/feather-sprite-v4.29.0.svg#message-circle" />
                             </svg>
-                        </button>
-                        <button @click="viewComments" class="btn btn-sm btn-outline-secondary">
-                            View Comments <svg class="feather">
+                        </span>
+                        <button @click="viewComments(false)" class="btn btn-sm btn-outline-secondary">
+                            {{ showComments ? 'Hide' : 'Show' }} Comments <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#message-square" />
                             </svg>
                         </button>
-                        <!-- <CommentModal :photoId="this.modalId" /> -->
                     </div>
                     <div class="comments">
-                        <div v-if="showComments" v-for="comment in photoComments" :key="comment.commentId" class="comment">
-                                <div class="comment-author">{{ comment.userId }}</div>
-                                <div class="comment-text">{{ comment.text }}</div>
+                        <div v-if="showComments" v-for="comment in photoComments" :key="comment.commentId"
+                            class="comment">
+                            <div class="comment-author font-weight-bold">{{ comment.authorUsername }}</div>
+                            <div class="comment-text">{{ comment.text }}</div>
+                        </div>
+                        <div class="comment-input">
+                            <input
+                                type="text"
+                                v-model="CommentText[modalId]"
+                                placeholder="Write a comment..."
+                                class="text-box"
+                            />
+                            <button @click="addComment" class="btn btn-primary">
+                                <svg class="feather">
+                                    <use href="/feather-sprite-v4.29.0.svg#send" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -72,6 +81,7 @@ export default {
             modalId: String(this.photoId),
             showComments: false,
             photoComments: [],
+            CommentText: {} 
         };
     },
     async mounted() {
@@ -164,9 +174,13 @@ export default {
                 console.error(error, "Error during the likes operation.")
             }
         },
-        async viewComments() {
+        async viewComments(refresh = false) {
             try {
-                this.showComments = !this.showComments;
+                if(!refresh) {
+                    this.showComments = !this.showComments;
+                } else {
+                    this.showComments = true;
+                }
                 if (this.showComments) {
                     const response = await this.$axios.get(`/posts/${this.photoId}/comments/`, {
                         headers: {
@@ -178,7 +192,22 @@ export default {
             } catch (error) {
                 console.error(error, "Error during the comments operation.")
             }
-        }
+        },
+        async addComment() {
+            try {
+                await this.$axios.post(`/posts/${this.photoId}/comments/`, {
+                    text: this.CommentText[this.modalId]
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                this.CommentText[this.modalId] = '';
+                this.viewComments(true);
+            } catch (error) {
+                console.error(error, "Error during the comments operation.")
+            }
+        },
     },
 };
 </script>
@@ -191,13 +220,13 @@ export default {
 }
 
 .photo-card {
-    border: 3px solid #6d6969;
-    border-radius: 4px;
-    padding: 10px;
-    width: 500px;
+    border: 2px solid #ccc;
+    border-radius: 12px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
     text-align: center;
-    font-family: 'Arial', sans-serif;
+    background-color: #fefefe; 
 }
+
 
 .photo-details {
     margin-top: 10px;
@@ -208,7 +237,7 @@ export default {
     margin-bottom: 5px;
 }
 
-.actions{
+.actions {
     display: flex;
     justify-content: space-between;
     margin: 15px;
@@ -217,9 +246,8 @@ export default {
 .comments {
     display: flex;
     flex-direction: column;
-    gap: 10px; 
-    max-width: 400px; 
-    margin: 0 auto; 
+    gap: 10px;
+    margin: 15px;
 }
 
 .comment {
@@ -229,7 +257,7 @@ export default {
     border-radius: 5px;
     padding: 10px;
     background-color: #f9f9f9;
-    text-align: right;
+    text-align: left;
 }
 
 .comment-author {
@@ -268,5 +296,24 @@ export default {
 
 .caption-text {
     padding: 0 10px;
+}
+
+.comment-input {
+    margin-top: 10px;
+    display: flex;
+}
+
+.text-box {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.text-box:focus {
+    border-color: #007bff;
 }
 </style>
