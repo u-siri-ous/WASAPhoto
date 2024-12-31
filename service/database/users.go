@@ -83,6 +83,7 @@ func (db *appdbimpl) GetUser(currentUserId uint64, requestedUserId uint64) (stru
 		username          string
 		numberOfFollowers uint64
 		accountsFollowed  uint64
+		numberOfPosts     uint64
 		isBlocked         bool
 		isFollowed        bool
 	)
@@ -92,6 +93,7 @@ func (db *appdbimpl) GetUser(currentUserId uint64, requestedUserId uint64) (stru
 			u.username,
 			COUNT(DISTINCT f1.followerUserId) as numberOfFollowers,
 			COUNT(DISTINCT f2.followedUserId) as accountsFollowed,
+			COUNT(DISTINCT p.postId) as numberOfPosts,
 			MAX(CASE 
         		WHEN f3.followerUserId = ? THEN 1 
         		ELSE 0 
@@ -104,6 +106,7 @@ func (db *appdbimpl) GetUser(currentUserId uint64, requestedUserId uint64) (stru
 		LEFT JOIN follows f1 ON u.id = f1.followedUserId
 		LEFT JOIN follows f2 ON u.id = f2.followerUserId
 		LEFT JOIN follows f3 ON u.id = f3.followedUserId
+		LEFT JOIN posts p ON u.id = p.userId
 		LEFT JOIN blocks b ON ? = b.blockedUserId
 		WHERE u.id = ?
 	`
@@ -111,6 +114,7 @@ func (db *appdbimpl) GetUser(currentUserId uint64, requestedUserId uint64) (stru
 	err := db.c.QueryRow(userGetQuery, currentUserId, currentUserId, requestedUserId, requestedUserId).Scan(&username,
 		&numberOfFollowers,
 		&accountsFollowed,
+		&numberOfPosts,
 		&isFollowed,
 		&isBlocked)
 
@@ -123,6 +127,7 @@ func (db *appdbimpl) GetUser(currentUserId uint64, requestedUserId uint64) (stru
 		Username:          username,
 		NumberOfFollowers: &numberOfFollowers,
 		AccountsFollowed:  &accountsFollowed,
+		NumberOfPosts:     &numberOfPosts,
 		IsFollowed:        &isFollowed,
 		IsBlocked:         &isBlocked,
 	}

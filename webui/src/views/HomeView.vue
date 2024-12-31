@@ -12,9 +12,10 @@ export default {
 			this.loading = true;
 			this.errormsg = null;
 			try {
-				let response = await this.$axios.get("/");
+				let response = await this.$axios.get("/users/1");
 				this.some_data = response.data;
 			} catch (e) {
+				console.log(e);
 				this.errormsg = e.toString();
 			}
 			this.loading = false;
