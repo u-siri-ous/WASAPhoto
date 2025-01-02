@@ -2,12 +2,6 @@
     <div class="container mt-5" v-if="notBanned">
         <div class="center-container">
             <div class="card photo-card p-4 w-75">
-                <button v-if="isMe" @click="deletePhoto" class="btn btn-danger delete-button mb-2">
-                    Delete Photo <svg class="feather">
-                        <use href="/feather-sprite-v4.29.0.svg#trash-2" />
-                    </svg>
-                </button>
-
                 <img :src="imgSrc" alt="Photo" class="card-img-top" />
                 <div class="card-body photo-details">
                     <div class="author">{{ authorName }}, {{ formattedDate }}</div>
@@ -28,10 +22,14 @@
                         </button>
                     </div>
                     <div class="comments">
-                        <div v-if="showComments" v-for="comment in photoComments" :key="comment.commentId"
-                            class="comment">
-                            <div class="comment-author font-weight-bold">{{ comment.authorUsername }}</div>
-                            <div class="comment-text">{{ comment.text }}</div>
+                        <div v-if="showComments" v-for="comment in photoComments" :key="comment.commentId">
+                            <CommentLine
+                                :photoId="photoId"
+                                :commentId="comment.commentId"
+                                :authorUsername="comment.authorUsername"
+                                :commentText="comment.text"
+                                :authorId="comment.userId"
+                            />
                         </div>
                         <div class="comment-input">
                             <input
@@ -40,7 +38,7 @@
                                 placeholder="Write a comment..."
                                 class="text-box"
                             />
-                            <button @click="addComment" class="btn btn-primary">
+                            <button @click="addComment" class="btn btn-primary ms-2">
                                 <svg class="feather">
                                     <use href="/feather-sprite-v4.29.0.svg#send" />
                                 </svg>
@@ -48,6 +46,11 @@
                         </div>
                     </div>
                 </div>
+                <button v-if="isMe" @click="deletePhoto" class="btn btn-danger delete-button mb-2">
+                    Delete Post <svg class="feather">
+                        <use href="/feather-sprite-v4.29.0.svg#trash" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -55,10 +58,12 @@
 
 
 <script>
+import CommentLine from './CommentLine.vue';
 
 const token = sessionStorage.getItem('authToken');
 export default {
     components: {
+        CommentLine,
     },
     props: {
         photoId: Number,
@@ -249,27 +254,6 @@ export default {
     flex-direction: column;
     gap: 10px;
     margin: 15px;
-}
-
-.comment {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    text-align: left;
-}
-
-.comment-author {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-.comment-text {
-    color: #555;
-    line-height: 1.5;
 }
 
 .like-counter {
