@@ -187,10 +187,17 @@ func (db *appdbimpl) CheckCommentId(commentId uint64) (bool, error) {
 	return response, responseError
 }
 
-func (db *appdbimpl) GetPosts(currentUserId uint64, userToGetStream uint64) (structs.Stream, error) {
+func (db *appdbimpl) GetPosts(currentUserId uint64, userToGetStream uint64, followedMode bool) (structs.Stream, error) {
 	var result structs.Stream
 
-	const getPostsQuery = "SELECT p.*, CASE l.userId WHEN ? THEN TRUE ELSE FALSE END AS IsLiked FROM posts p LEFT JOIN likes l ON l.userId = ? AND l.likedPostId = p.postId  LEFT JOIN blocks b ON b.blockerUserId = p.userId WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL AND p.userId = ?"
+	var getPostsQuery string
+
+	if !followedMode {
+		getPostsQuery = "SELECT p.*, CASE l.userId WHEN ? THEN TRUE ELSE FALSE END AS IsLiked FROM posts p LEFT JOIN likes l ON l.userId = ? AND l.likedPostId = p.postId  LEFT JOIN blocks b ON b.blockerUserId = p.userId WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL AND p.userId = ? ORDER BY p.uploadTime DESC"
+	} else {
+		getPostsQuery = "SELECT p.*, CASE l.userId WHEN ? THEN TRUE ELSE FALSE END AS IsLiked FROM posts p LEFT JOIN likes l ON l.userId = ? AND l.likedPostId = p.postId LEFT JOIN blocks b ON b.blockerUserId = p.userId LEFT JOIN follows f ON f.followerUserId = ? WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL AND p.userId = f.followedUserId ORDER BY p.uploadTime DESC"
+		userToGetStream = currentUserId
+	}
 
 	rows, errors := db.c.Query(getPostsQuery, currentUserId, currentUserId, currentUserId, userToGetStream)
 
