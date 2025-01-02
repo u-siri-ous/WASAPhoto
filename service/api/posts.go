@@ -1,8 +1,13 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/julienschmidt/httprouter"
@@ -334,4 +339,78 @@ func (rt *_router) DeleteCommentPost(w http.ResponseWriter, r *http.Request, ps 
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (rt *_router) GetPostPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	postId, requestError := strconv.ParseUint(ps.ByName("postId"), 10, 64)
+
+	if requestError != nil {
+		utility.LogWithError("GetPostPhoto: error while parsing the request", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	posterUserId, requestError := strconv.ParseUint(ps.ByName("userId"), 10, 64)
+
+	if requestError != nil {
+		utility.LogWithError("GetPostPhoto: error while parsing the request", http.StatusBadRequest, requestError, w, ctx)
+		return
+	}
+
+	userExists, checkErrors := rt.db.CheckUserId(posterUserId)
+
+	if checkErrors != nil {
+		utility.LogWithError("GetPostPhoto: error while checking the requested user on the database - CheckUserId", http.StatusInternalServerError, checkErrors, w, ctx)
+		return
+	}
+
+	if !userExists {
+		utility.LogWithField("GetPostPhoto: the requested user does not exists!", http.StatusNotFound, "userId", posterUserId, w, ctx)
+		return
+	}
+
+	isUserBlocked, checkErrors := rt.db.CheckBlock(posterUserId, ctx.Uid)
+
+	if checkErrors != nil {
+		utility.LogWithError("GetPostPhoto: error while checking if the requested user is blocked - CheckBlock", http.StatusInternalServerError, checkErrors, w, ctx)
+		return
+	}
+
+	if isUserBlocked {
+		utility.LogWithField("GetPostPhoto: the requester user is blocked!", http.StatusNotFound, "userId", posterUserId, w, ctx)
+		return
+	}
+
+	postExists, checkPostError := rt.db.CheckPostId(postId)
+	if checkPostError != nil {
+		utility.LogWithError("GetPostPhoto: error while checking the request - CheckPostId", http.StatusInternalServerError, checkPostError, w, ctx)
+		return
+	}
+
+	if !postExists {
+		utility.LogWithField("GetPostPhoto: the requested post does not exists", http.StatusNotFound, "postId", postId, w, ctx)
+		return
+	}
+
+	path := filepath.Join(storage.BasePath, "/", strconv.FormatUint(posterUserId, 10), storage.UploadedPhotoFolder, fmt.Sprintf("%d.jpg", postId))
+	photofile, openPhotoError := os.Open(path)
+	if openPhotoError != nil {
+		utility.LogWithError("GetPostPhoto: resource not found", http.StatusInternalServerError, openPhotoError, w, ctx)
+		return
+	} else {
+		w.Header().Set("Content-Type", storage.AllowedMimeType)
+		buf := bytes.NewBuffer(nil)
+		_, copyPhotoError := io.Copy(buf, photofile)
+		if copyPhotoError != nil {
+			utility.LogWithError("GetPostPhoto: error while copying the file to the buffer", http.StatusInternalServerError, copyPhotoError, w, ctx)
+			return
+		} else {
+			w.WriteHeader(http.StatusOK)
+			_, writeResponseError := w.Write(buf.Bytes())
+			if writeResponseError != nil {
+				utility.LogWithError("GetPostPhoto: error while writing the response", http.StatusInternalServerError, writeResponseError, w, ctx)
+				return
+			}
+			return
+		}
+	}
 }
