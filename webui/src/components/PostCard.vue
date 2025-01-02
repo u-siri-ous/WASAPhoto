@@ -8,7 +8,7 @@
                     </svg>
                 </button>
 
-                <!-- <img :src="imgSrc" alt="Photo" class="card-img-top" /> -->
+                <img :src="imgSrc" alt="Photo" class="card-img-top" />
                 <div class="card-body photo-details">
                     <div class="author">{{ authorName }}, {{ formattedDate }}</div>
                     <div class="card-text text-center bg-light fs-5">{{ caption }}</div>
@@ -22,7 +22,7 @@
                             </svg>
                         </span>
                         <button @click="viewComments(false)" class="btn btn-sm btn-outline-secondary">
-                            {{ showComments ? 'Hide' : 'Show' }} Comments <svg class="feather">
+                            {{ CommentCount }} <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#message-square" />
                             </svg>
                         </button>
@@ -55,12 +55,10 @@
 
 
 <script>
-// import CommentModal from '@/components/CommentModal.vue';
 
 const token = sessionStorage.getItem('authToken');
 export default {
     components: {
-        // CommentModal,
     },
     props: {
         photoId: Number,
@@ -68,6 +66,7 @@ export default {
         caption: String,
         date: Number,
         likes: Number,
+        comments: Number,
         isLiked: Boolean,
     },
     data() {
@@ -78,6 +77,7 @@ export default {
             notBanned: true,
             Liked: this.isLiked,
             LikeCount: this.likes,
+            CommentCount: this.comments,
             modalId: String(this.photoId),
             showComments: false,
             photoComments: [],
@@ -88,14 +88,14 @@ export default {
 
         if (this.photoId) {
             try {
-                // const response = await this.$axios.get(`/photos/${this.photoId}`, {
-                //   headers: {
-                //     Authorization: `Bearer ${token}`,
-                //   },
-                //   responseType: 'blob',
-                // });
-                // const imageUrl = URL.createObjectURL(response.data);
-                // this.imgSrc = imageUrl;
+                const response = await this.$axios.get(`/posts/${this.photoId}/photo/${this.$route.params.userId}`, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                  responseType: 'blob',
+                });
+                const imageUrl = URL.createObjectURL(response.data);
+                this.imgSrc = imageUrl;
                 this.findAuthorId();
             } catch (error) {
                 if (error.response) {
@@ -188,6 +188,7 @@ export default {
                         }
                     });
                     this.photoComments = response.data.comments !== null ? response.data.comments : [];
+                    this.CommentCount = this.photoComments.length;
                 }
             } catch (error) {
                 console.error(error, "Error during the comments operation.")

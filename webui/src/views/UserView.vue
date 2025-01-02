@@ -37,6 +37,7 @@
                 :date="photo.timeOfCreation" 
                 :authorName="photo.author" 
                 :likes="photo.numberOfLikes" 
+                :comments="photo.numberOfComments"
                 :caption="photo.caption" 
                 :isLiked="photo.isliked" 
             />
