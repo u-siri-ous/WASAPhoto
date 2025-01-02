@@ -95,7 +95,20 @@ func (rt *_router) GetStream(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	streamRequested, requestError := rt.db.GetPosts(ctx.Uid, userToGetStream)
+	followedParam := r.URL.Query().Get("followed")
+	var followedMode bool
+	if followedParam == "" {
+		followedMode = false
+	} else {
+		parsedFollowedMode, parseError := strconv.ParseBool(followedParam)
+		if parseError != nil {
+			followedMode = false
+		} else {
+			followedMode = parsedFollowedMode
+		}
+	}
+
+	streamRequested, requestError := rt.db.GetPosts(ctx.Uid, userToGetStream, followedMode)
 
 	if requestError != nil {
 		utility.LogWithError("GetStream: error while getting the requested stream - GetPosts", http.StatusInternalServerError, requestError, w, ctx)

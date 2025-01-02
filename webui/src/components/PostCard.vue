@@ -2,13 +2,7 @@
     <div class="container mt-5" v-if="notBanned">
         <div class="center-container">
             <div class="card photo-card p-4 w-75">
-                <button v-if="isMe" @click="deletePhoto" class="btn btn-danger delete-button mb-2">
-                    Delete Photo <svg class="feather">
-                        <use href="/feather-sprite-v4.29.0.svg#trash-2" />
-                    </svg>
-                </button>
-
-                <!-- <img :src="imgSrc" alt="Photo" class="card-img-top" /> -->
+                <img :src="imgSrc" alt="Photo" class="card-img-top" />
                 <div class="card-body photo-details">
                     <div class="author">{{ authorName }}, {{ formattedDate }}</div>
                     <div class="card-text text-center bg-light fs-5">{{ caption }}</div>
@@ -16,22 +10,26 @@
                         <button @click="likePhoto" class="btn btn-sm btn-outline-primary">
                             {{ Liked ? 'Unlike' : 'Like' }}
                         </button>
-                        <span class="like-counter">
+                        <span @click="viewLikes" class="like-counter" data-bs-toggle="modal" :data-bs-target="'#userListModal' + modalId">
                             {{ LikeCount }} Likes <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#thumbs-up" />
                             </svg>
                         </span>
                         <button @click="viewComments(false)" class="btn btn-sm btn-outline-secondary">
-                            {{ showComments ? 'Hide' : 'Show' }} Comments <svg class="feather">
+                            {{ CommentCount }} <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#message-square" />
                             </svg>
                         </button>
                     </div>
                     <div class="comments">
-                        <div v-if="showComments" v-for="comment in photoComments" :key="comment.commentId"
-                            class="comment">
-                            <div class="comment-author font-weight-bold">{{ comment.authorUsername }}</div>
-                            <div class="comment-text">{{ comment.text }}</div>
+                        <div v-if="showComments" v-for="comment in photoComments" :key="comment.commentId">
+                            <CommentLine
+                                :photoId="photoId"
+                                :commentId="comment.commentId"
+                                :authorUsername="comment.authorUsername"
+                                :commentText="comment.text"
+                                :authorId="comment.userId"
+                            />
                         </div>
                         <div class="comment-input">
                             <input
@@ -40,7 +38,7 @@
                                 placeholder="Write a comment..."
                                 class="text-box"
                             />
-                            <button @click="addComment" class="btn btn-primary">
+                            <button @click="addComment" class="btn btn-primary ms-2">
                                 <svg class="feather">
                                     <use href="/feather-sprite-v4.29.0.svg#send" />
                                 </svg>
@@ -48,19 +46,27 @@
                         </div>
                     </div>
                 </div>
+                <button v-if="isMe" @click="deletePhoto" class="btn btn-danger delete-button mb-2">
+                    Delete Post <svg class="feather">
+                        <use href="/feather-sprite-v4.29.0.svg#trash" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
+    <UserList :users="UserList" :postId="modalId" :typeOfList="TypeOfList" />
 </template>
 
 
 <script>
-// import CommentModal from '@/components/CommentModal.vue';
+import CommentLine from './CommentLine.vue';
+import UserList from './UserList.vue';
 
 const token = sessionStorage.getItem('authToken');
 export default {
     components: {
-        // CommentModal,
+        CommentLine,
+        UserList,
     },
     props: {
         photoId: Number,
@@ -68,6 +74,7 @@ export default {
         caption: String,
         date: Number,
         likes: Number,
+        comments: Number,
         isLiked: Boolean,
     },
     data() {
@@ -78,24 +85,27 @@ export default {
             notBanned: true,
             Liked: this.isLiked,
             LikeCount: this.likes,
+            CommentCount: this.comments,
             modalId: String(this.photoId),
             showComments: false,
             photoComments: [],
-            CommentText: {} 
+            CommentText: {},
+            UserList: {},
+            TypeOfList: '',
         };
     },
     async mounted() {
 
         if (this.photoId) {
             try {
-                // const response = await this.$axios.get(`/photos/${this.photoId}`, {
-                //   headers: {
-                //     Authorization: `Bearer ${token}`,
-                //   },
-                //   responseType: 'blob',
-                // });
-                // const imageUrl = URL.createObjectURL(response.data);
-                // this.imgSrc = imageUrl;
+                const response = await this.$axios.get(`/posts/${this.photoId}/photo/${this.$route.params.userId}`, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                  responseType: 'blob',
+                });
+                const imageUrl = URL.createObjectURL(response.data);
+                this.imgSrc = imageUrl;
                 this.findAuthorId();
             } catch (error) {
                 if (error.response) {
@@ -188,6 +198,7 @@ export default {
                         }
                     });
                     this.photoComments = response.data.comments !== null ? response.data.comments : [];
+                    this.CommentCount = this.photoComments.length;
                 }
             } catch (error) {
                 console.error(error, "Error during the comments operation.")
@@ -208,6 +219,20 @@ export default {
                 console.error(error, "Error during the comments operation.")
             }
         },
+        async viewLikes() {
+            try {
+                const response = await this.$axios.get(`/posts/${this.photoId}/likes/self`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const users = response.data.users !== null ? response.data.users : [];
+                this.UserList = users;
+                this.TypeOfList = 'Likes';
+            } catch (error) {
+                console.error(error, "Error while showing the likes.")
+            }
+        }
     },
 };
 </script>
@@ -248,27 +273,6 @@ export default {
     flex-direction: column;
     gap: 10px;
     margin: 15px;
-}
-
-.comment {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    text-align: left;
-}
-
-.comment-author {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-.comment-text {
-    color: #555;
-    line-height: 1.5;
 }
 
 .like-counter {
