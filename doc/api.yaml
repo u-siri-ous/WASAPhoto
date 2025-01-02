@@ -119,6 +119,7 @@ paths:
   /users/{userId}/stream:
     parameters:
       - $ref: "#/components/parameters/UserId"
+      - $ref: "#/components/parameters/FollowedModeQuery"
 
     get:
       tags: ["user"]
@@ -627,6 +628,16 @@ components:
         example: 1
         maximum: 18446744073709551615
         minimum: 0
+      required: true
+    
+    FollowedModeQuery:
+      in: query
+      name: followed
+      description: If the stream mode should be set in followed mode or not.
+      schema:
+        type: boolean
+        example: false
+        description: Should the stream return the post of the followed users?
       required: true
 
     PostId:
