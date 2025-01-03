@@ -76,7 +76,7 @@ export default {
     },
     data() {
         return {
-            authorId: 0,
+            authorId: this.authorName,
             isMe: false,
             imgSrc: null,
             notBanned: true,
@@ -93,7 +93,7 @@ export default {
 
         if (this.photoId) {
             try {
-                const response = await this.$axios.get(`/posts/${this.photoId}/photo/${this.$route.params.userId}`, {
+                const response = await this.$axios.get(`/posts/${this.photoId}/photo/${this.authorId}`, {
                   headers: {
                     Authorization: `Bearer ${token}`,
                   },

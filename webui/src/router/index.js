@@ -5,6 +5,7 @@ import UserView from '../views/UserView.vue'
 import ExploreUsers from '../views/ExploreUsers.vue'
 import ChangeUsernameView from '../views/ChangeUsernameView.vue'
 import CreatePostView from '../views/CreatePostView.vue'
+import StreamView from '../views/StreamView.vue'
 
 const router = createRouter({
 	history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -16,6 +17,7 @@ const router = createRouter({
 		{path: '/settings', component: ChangeUsernameView},
 		{path: '/posts', component: CreatePostView},
 		{path: '/users/:userId', component: UserView},
+		{path: '/users/:userId/stream', component: StreamView},
 	]
 })
 

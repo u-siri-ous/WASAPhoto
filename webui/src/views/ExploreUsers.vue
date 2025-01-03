@@ -103,7 +103,6 @@ export default {
 
 <style scoped>
 .user-search-container {
-    max-width: 800px;
     margin: 0 auto;
     padding: 20px;
     font-family: 'Roboto', sans-serif;

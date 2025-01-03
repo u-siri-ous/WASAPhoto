@@ -30,7 +30,7 @@
         <hr />
 
         <div class="photo-gallery">
-            <PostCard 
+            <PhotoComponent 
                 v-for="photo in photoList" 
                 :key="photo.photoId" 
                 :photoId="photo.photoId" 
@@ -48,7 +48,7 @@
 
 
 <script>
-import PostCard from '../components/PostCard.vue';
+import PhotoComponent from '../components/PhotoComponent.vue';
 import UserList from '../components/UserList.vue';
 
 const token = sessionStorage.getItem('authToken');
@@ -220,7 +220,7 @@ export default {
         }
     },
     components: {
-        PostCard,
+        PhotoComponent,
         UserList,
     },
 };
