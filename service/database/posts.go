@@ -52,7 +52,7 @@ func (db *appdbimpl) CheckLikePost(currentUserId uint64, postId uint64) (uint64,
 func (db *appdbimpl) GetLikes(currentUserId uint64, postId uint64) (structs.UserList, error) {
 	var result structs.UserList
 
-	const getLikesQuery = "SELECT pLikes.id, pLikes.username FROM ( SELECT u.id, u.username FROM users u LEFT JOIN posts lPosts ON lPosts.postId = ? LEFT JOIN likes l ON l.userId = u.id ) pLikes LEFT JOIN blocks b ON b.blockerUserId = pLikes.id WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL"
+	const getLikesQuery = "SELECT pLikes.id, pLikes.username FROM ( SELECT u.id, u.username FROM users u LEFT JOIN likes l ON l.userId = u.id WHERE l.likedPostId = ? ) pLikes LEFT JOIN blocks b ON b.blockerUserId = pLikes.id WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL"
 
 	rows, errors := db.c.Query(getLikesQuery, postId, currentUserId)
 
