@@ -513,6 +513,13 @@ components:
           type: integer
           example: 1
           description: postId
+        author:
+          type: string
+          example: User
+          description: The name of the author of the post
+          pattern: '^[a-zA-Z][\.]{0,1}([\w][\.]{0,1})*[\w]$'
+          minLength: 3
+          maxLength: 25
         authorId:
           type: integer
           example: 1
