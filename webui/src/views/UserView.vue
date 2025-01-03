@@ -3,26 +3,32 @@
         <h1 class="profile-username">{{ userName }}</h1>
         
         <div v-if="found" class="user-actions">
-            <div v-if="!isItMe" class="action-buttons">
-                <button @click="toggleFollow" class="btn col follow-btn">
+            <div class="action-buttons">
+                <button v-if="!isItMe" @click="toggleFollow" class="btn col follow-btn">
                     {{ isFollowed ? 'Unfollow' : 'Follow' }}
                     <svg class="icon">
                         <use href="/feather-sprite-v4.29.0.svg#user-plus" />
                     </svg>
                 </button>
-                <button @click="toggleBlock" class="btn col block-btn">
-                    {{ isBanned ? 'Unban' : 'Ban' }}
+                <button v-if="!isItMe" @click="toggleBlock" class="btn col block-btn">
+                    {{ isBlocked ? 'Unblock' : 'Block' }}
                     <svg class="icon">
                         <use href="/feather-sprite-v4.29.0.svg#slash" />
+                    </svg>
+                </button>
+                <button v-if="isItMe" @click="viewBlock" class="btn col block-btn" data-bs-toggle="modal" :data-bs-target="'#userListModal' + token">
+                    View Blocked
+                    <svg class="icon">
+                        <use href="/feather-sprite-v4.29.0.svg#user-x" />
                     </svg>
                 </button>
             </div>
 
             <div class="user-info">
                 <div class="info-card">
-                    <p><strong>Followers:</strong> {{ followCount }}</p>
-                    <p><strong>Followed:</strong> {{ followedCount }}</p>
-                    <p><strong>Photos:</strong> {{ photoCount }}</p>
+                    <button @click="viewFollowers" class="btn btn-stats btn-hover" data-bs-toggle="modal" :data-bs-target="'#userListModal' + token"><strong>Followers:</strong> {{ followCount }}</button>
+                    <button @click="viewFollowing" class="btn btn-stats btn-hover" data-bs-toggle="modal" :data-bs-target="'#userListModal' + token"><strong>Followed:</strong> {{ followedCount }}</button>
+                    <button class="btn btn-stats"><strong>Photos:</strong> {{ photoCount }}</button>
                 </div>
             </div>
         </div>
@@ -30,7 +36,7 @@
         <hr />
 
         <div class="photo-gallery">
-            <PostCard 
+            <PhotoComponent 
                 v-for="photo in photoList" 
                 :key="photo.photoId" 
                 :photoId="photo.photoId" 
@@ -43,11 +49,14 @@
             />
         </div>
     </div>
+    <UserList :users="UserList" :postId="token" :typeOfList="TypeOfList" />
 </template>
 
 
 <script>
-import PostCard from '../components/PostCard.vue';
+import PhotoComponent from '../components/PhotoComponent.vue';
+import UserList from '../components/UserList.vue';
+
 const token = sessionStorage.getItem('authToken');
 
 export default {
@@ -66,11 +75,13 @@ export default {
             followCount: 0,
             followedCount: 0,
             photoCount: 0,
-            isBanned: false,
+            isBlocked: false,
             isFollowed: false,
             isItMe: false,
             photoList: [],
             reloadFlag: true,
+            UserList: {},
+            TypeOfList: '',
         };
     },
     watch: {
@@ -105,7 +116,7 @@ export default {
                 this.followCount = getUserResponse.data.numberOfFollowers;
                 this.followedCount = getUserResponse.data.accountsFollowed;
                 this.photoCount = getUserResponse.data.numberOfPosts;
-                this.isBanned = getUserResponse.data.isBlocked;
+                this.isBlocked = getUserResponse.data.isBlocked;
                 this.isFollowed = getUserResponse.data.isFollowed;
 
                 const getStreamResponse = await this.$axios.get(`/users/${userId}/stream`, {
@@ -130,7 +141,7 @@ export default {
                             break;
                         case 403:
                             console.error('Access Forbidden:', error.response.data);
-                            this.userName = "You have been banned by the user"
+                            this.userName = "You have been blocked by the user"
                             break;
                         case 404:
                             console.error('Not Found:', error.response.data);
@@ -150,9 +161,7 @@ export default {
             }
         },
         async toggleFollow() {
-            // frontend
             this.isFollowed = !this.isFollowed;
-            // backend
             const userId = this.$route.params.userId;
             const token = sessionStorage.getItem('authToken');
             try {
@@ -178,13 +187,11 @@ export default {
 
         },
         async toggleBlock() {
-            // frontend
-            this.isBanned = !this.isBanned;
-            // backend
+            this.isBlocked = !this.isBlocked;
             const userId = this.$route.params.userId;
             const token = sessionStorage.getItem('authToken');
             try {
-                if (this.isBanned) {
+                if (this.isBlocked) {
                     await this.$axios.put(`/blocked/${userId}`, {
                     }, {
                         headers: {
@@ -203,9 +210,66 @@ export default {
                 console.error(error, "Error during the block operation.")
             }
         },
+        async viewLikes(photoId) {
+            try {
+                const response = await this.$axios.get(`/posts/${photoId}/likes/self`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const users = response.data.users !== null ? response.data.users : [];
+                this.UserList = users;
+                this.TypeOfList = 'Likes';
+            } catch (error) {
+                console.error(error, "Error while showing the likes.")
+            }
+        },
+        async viewFollowers() {
+            try {
+                const response = await this.$axios.get(`/followers/${this.$route.params.userId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const users = response.data.users !== null ? response.data.users : [];
+                this.UserList = users;
+                this.TypeOfList = 'Followers';
+            } catch (error) {
+                console.error(error, "Error while showing the followers.")
+            }
+        },
+        async viewFollowing() {
+            try {
+                const response = await this.$axios.get(`/following/${this.$route.params.userId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const users = response.data.users !== null ? response.data.users : [];
+                this.UserList = users;
+                this.TypeOfList = 'Following';
+            } catch (error) {
+                console.error(error, "Error while showing the following.")
+            }
+        },
+        async viewBlock() {
+            try {
+                const response = await this.$axios.get(`/blocked/`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const users = response.data.users !== null ? response.data.users : [];
+                this.UserList = users;
+                this.TypeOfList = 'Blocked';
+            } catch (error) {
+                console.error(error, "Error while showing the blocked users.")
+            }
+        }
     },
     components: {
-        PostCard,
+        PhotoComponent,
+        UserList,
     },
 };
 </script>
@@ -277,6 +341,11 @@ export default {
     text-align: center;
 }
 
+.info-card {
+    display: flex;
+    justify-content: space-between;
+}
+
 .info-card p {
     margin: 0;
     font-size: 1rem;
@@ -294,6 +363,15 @@ export default {
     width: 16px;
     height: 16px;
     margin-left: 5px;
+}
+
+.btn-stats {
+    background-color: #7a7a7a9e;
+    color: #333;
+}
+
+.btn-stats.btn-hover:hover {
+    background-color: #6767679e;
 }
 </style>
   

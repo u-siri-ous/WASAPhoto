@@ -36,10 +36,7 @@ export default {
     },
     async mounted() {
         if (this.authorId == token) {
-            console.log("This is me", this.authorId, token);
             this.isMe = true;
-        } else {
-            console.log("This is not me", this.authorId, token);
         }
     },
     methods: {

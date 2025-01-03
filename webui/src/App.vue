@@ -19,7 +19,7 @@ export default {
 		else {
 			if (localStorage.getItem('loggedIn')) {
 				localStorage.removeItem('loggedIn');
-				this.$router.push('/users/' + sessionStorage.getItem('userId'));
+				this.$router.push('/users/' + sessionStorage.getItem('userId') + '/stream');
 			}
 		}
 	},
@@ -60,6 +60,14 @@ export default {
 									<use href="/feather-sprite-v4.29.0.svg#home" />
 								</svg>
 								Login
+							</RouterLink>
+						</li>
+						<li v-if="username !== null" class="nav-item">
+							<RouterLink :to="streampath" class="nav-link">
+								<svg class="feather">
+									<use href="/feather-sprite-v4.29.0.svg#home" />
+								</svg>
+								Stream
 							</RouterLink>
 						</li>
 						<li v-if="username !== null" class="nav-item">

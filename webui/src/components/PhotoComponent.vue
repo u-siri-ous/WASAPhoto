@@ -1,5 +1,5 @@
 <template>
-    <div class="container mt-5" v-if="notBanned">
+    <div class="container mt-5" v-if="notBlocked">
         <div class="center-container">
             <div class="card photo-card p-4 w-75">
                 <img :src="imgSrc" alt="Photo" class="card-img-top" />
@@ -10,7 +10,7 @@
                         <button @click="likePhoto" class="btn btn-sm btn-outline-primary">
                             {{ Liked ? 'Unlike' : 'Like' }}
                         </button>
-                        <span @click="viewLikes" class="like-counter" data-bs-toggle="modal" :data-bs-target="'#userListModal' + modalId">
+                        <span @click="viewLikes" class="like-counter" data-bs-toggle="modal" :data-bs-target="'#userListModal' + token">
                             {{ LikeCount }} Likes <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#thumbs-up" />
                             </svg>
@@ -54,19 +54,16 @@
             </div>
         </div>
     </div>
-    <UserList :users="UserList" :postId="modalId" :typeOfList="TypeOfList" />
 </template>
 
 
 <script>
 import CommentLine from './CommentLine.vue';
-import UserList from './UserList.vue';
 
 const token = sessionStorage.getItem('authToken');
 export default {
     components: {
         CommentLine,
-        UserList,
     },
     props: {
         photoId: Number,
@@ -79,10 +76,10 @@ export default {
     },
     data() {
         return {
-            authorId: 0,
+            authorId: this.authorName,
             isMe: false,
             imgSrc: null,
-            notBanned: true,
+            notBlocked: true,
             Liked: this.isLiked,
             LikeCount: this.likes,
             CommentCount: this.comments,
@@ -90,15 +87,13 @@ export default {
             showComments: false,
             photoComments: [],
             CommentText: {},
-            UserList: {},
-            TypeOfList: '',
         };
     },
     async mounted() {
 
         if (this.photoId) {
             try {
-                const response = await this.$axios.get(`/posts/${this.photoId}/photo/${this.$route.params.userId}`, {
+                const response = await this.$axios.get(`/posts/${this.photoId}/photo/${this.authorId}`, {
                   headers: {
                     Authorization: `Bearer ${token}`,
                   },
@@ -110,7 +105,7 @@ export default {
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
-                    this.notBanned = false;
+                    this.notBlocked = false;
                     switch (statusCode) {
                         case 401:
                             console.error('Unauthorized:', error.response.data);
@@ -220,18 +215,7 @@ export default {
             }
         },
         async viewLikes() {
-            try {
-                const response = await this.$axios.get(`/posts/${this.photoId}/likes/self`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                const users = response.data.users !== null ? response.data.users : [];
-                this.UserList = users;
-                this.TypeOfList = 'Likes';
-            } catch (error) {
-                console.error(error, "Error while showing the likes.")
-            }
+            this.$parent.viewLikes(this.photoId);
         }
     },
 };
@@ -277,9 +261,14 @@ export default {
 
 .like-counter {
     margin-left: 2px;
-    border: 2px solid #d102027a;
+    border: 2px solid #ff6f007a;
     border-radius: 4px;
     padding: 8px;
+}
+
+.like-counter:hover {
+    cursor: pointer;
+    background-color: #ff6f007a;
 }
 
 .caption {

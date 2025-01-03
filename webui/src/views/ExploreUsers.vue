@@ -63,8 +63,7 @@ export default {
                     },
                 });
                 this.searched = true;
-                this.Users = response.data.users;
-                this.Text = this.Users.length === 0 ? "No users found matching your search." : "";
+                this.Users = response.data.users !== null ? response.data.users : [];
             } catch (error) {
                 console.error(error, "Error during user search");
                 this.searched = true;
@@ -103,7 +102,6 @@ export default {
 
 <style scoped>
 .user-search-container {
-    max-width: 800px;
     margin: 0 auto;
     padding: 20px;
     font-family: 'Roboto', sans-serif;
