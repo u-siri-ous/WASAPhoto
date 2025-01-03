@@ -69,7 +69,7 @@ export default {
         isUsernameValid() {
 
             const usernameRegex = /^[a-zA-Z][\.]{0,1}([\w][\.]{0,1})*[\w]$/
-            return usernameRegex.test(this.username) && this.username.length >= 5 && this.username.length <= 25
+            return usernameRegex.test(this.username) && this.username.length >= 3 && this.username.length <= 25
         },
     },
 };
