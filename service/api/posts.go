@@ -66,7 +66,7 @@ func (rt *_router) CreatePost(w http.ResponseWriter, r *http.Request, ps httprou
 
 	post := structs.Post{
 		Id:             postId,
-		Author:         ctx.Uid,
+		AuthorId:       ctx.Uid,
 		Caption:        photoCaption,
 		Likes:          0,
 		Comments:       0,

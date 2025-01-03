@@ -78,11 +78,11 @@ func (db *appdbimpl) GetLikes(currentUserId uint64, postId uint64) (structs.User
 func (db *appdbimpl) InsertLikePost(currentUserId uint64, postId uint64) error {
 	const insertLikeQuery = "INSERT INTO likes (likedPostId, userId) VALUES (?, ?)"
 	const deleteLikeQuery = "DELETE FROM likes WHERE likedPostId = ? AND userId = ?"
-	const incrementPostLike = "UPDATE posts SET likes = likes + 1"
+	const incrementPostLike = "UPDATE posts SET likes = likes + 1 WHERE postId = ?"
 	_, err := db.c.Exec(insertLikeQuery, postId, currentUserId)
 
 	if err == nil {
-		_, incrementErr := db.c.Exec(incrementPostLike)
+		_, incrementErr := db.c.Exec(incrementPostLike, postId)
 		if incrementErr != nil {
 			_, deleteLikeError := db.c.Exec(deleteLikeQuery, postId, currentUserId)
 			if deleteLikeError != nil {
@@ -97,11 +97,11 @@ func (db *appdbimpl) InsertLikePost(currentUserId uint64, postId uint64) error {
 
 func (db *appdbimpl) DeleteLikePost(currentUserId uint64, postId uint64) error {
 	const deleteLikeQuery = "DELETE FROM likes WHERE likedPostId = ? AND userId = ?"
-	const decrementPostLike = "UPDATE posts SET likes = likes - 1"
+	const decrementPostLike = "UPDATE posts SET likes = likes - 1 WHERE postId = ?"
 	_, err := db.c.Exec(deleteLikeQuery, postId, currentUserId)
 
 	if err == nil {
-		_, incrementErr := db.c.Exec(decrementPostLike)
+		_, incrementErr := db.c.Exec(decrementPostLike, postId)
 		if incrementErr != nil {
 			return incrementErr
 		}
@@ -139,7 +139,7 @@ func (db *appdbimpl) GetCommentsPost(currentUserId uint64, postId uint64) (struc
 func (db *appdbimpl) InsertCommentPost(currentUserId uint64, postId uint64, text string) error {
 	const insertCommentQuery = "INSERT INTO comments (postId, userId, text) VALUES (?, ?, ?)"
 	const deleteCommentQuery = "DELETE FROM comments WHERE commentId = ? AND userId = ?"
-	const incrementPostLike = "UPDATE posts SET comments = comments + 1"
+	const incrementPostComment = "UPDATE posts SET comments = comments + 1 WHERE postid = ?"
 	result, err := db.c.Exec(insertCommentQuery, postId, currentUserId, text)
 
 	if err == nil {
@@ -149,7 +149,7 @@ func (db *appdbimpl) InsertCommentPost(currentUserId uint64, postId uint64, text
 			return errors
 		}
 
-		_, incrementErr := db.c.Exec(incrementPostLike)
+		_, incrementErr := db.c.Exec(incrementPostComment, postId)
 		if incrementErr != nil {
 			_, err := db.c.Exec(deleteCommentQuery, commentId, currentUserId)
 
@@ -166,11 +166,11 @@ func (db *appdbimpl) InsertCommentPost(currentUserId uint64, postId uint64, text
 
 func (db *appdbimpl) DeleteCommentPost(currentUserId uint64, postId uint64, commentId uint64) error {
 	const deleteCommentQuery = "DELETE FROM comments WHERE commentId = ? AND userId = ? AND postId = ?"
-	const decrementPostLike = "UPDATE posts SET comments = comments - 1"
+	const decrementPostLike = "UPDATE posts SET comments = comments - 1 WHERE postId = ?"
 	_, err := db.c.Exec(deleteCommentQuery, commentId, currentUserId, postId)
 
 	if err == nil {
-		_, decrementErr := db.c.Exec(decrementPostLike)
+		_, decrementErr := db.c.Exec(decrementPostLike, postId)
 		if decrementErr != nil {
 			return decrementErr
 		}
@@ -193,9 +193,9 @@ func (db *appdbimpl) GetPosts(currentUserId uint64, userToGetStream uint64, foll
 	var getPostsQuery string
 
 	if !followedMode {
-		getPostsQuery = "SELECT p.*, CASE l.userId WHEN ? THEN TRUE ELSE FALSE END AS IsLiked FROM posts p LEFT JOIN likes l ON l.userId = ? AND l.likedPostId = p.postId  LEFT JOIN blocks b ON b.blockerUserId = p.userId WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL AND p.userId = ? ORDER BY p.uploadTime DESC"
+		getPostsQuery = "SELECT p.*, u.username AS author, CASE l.userId WHEN ? THEN TRUE ELSE FALSE END AS IsLiked FROM posts p LEFT JOIN likes l ON l.userId = ? AND l.likedPostId = p.postId LEFT JOIN blocks b ON b.blockerUserId = p.userId LEFT JOIN users u ON u.id = p.userId WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL AND p.userId = ? ORDER BY p.uploadTime DESC"
 	} else {
-		getPostsQuery = "SELECT p.*, CASE l.userId WHEN ? THEN TRUE ELSE FALSE END AS IsLiked FROM posts p LEFT JOIN likes l ON l.userId = ? AND l.likedPostId = p.postId LEFT JOIN blocks b ON b.blockerUserId = p.userId LEFT JOIN follows f ON f.followerUserId = ? WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL AND p.userId = f.followedUserId ORDER BY p.uploadTime DESC"
+		getPostsQuery = "SELECT p.*, u.username AS author, CASE l.userId WHEN ? THEN TRUE ELSE FALSE END AS IsLiked FROM posts p LEFT JOIN likes l ON l.userId = ? AND l.likedPostId = p.postId LEFT JOIN blocks b ON b.blockerUserId = p.userId LEFT JOIN follows f ON f.followerUserId = ? LEFT JOIN users u ON u.id = p.userId WHERE b.blockedUserId != ? OR b.blockedUserId IS NULL AND p.userId = f.followedUserId ORDER BY p.uploadTime DESC"
 		userToGetStream = currentUserId
 	}
 
@@ -208,7 +208,7 @@ func (db *appdbimpl) GetPosts(currentUserId uint64, userToGetStream uint64, foll
 
 	for rows.Next() {
 		var post structs.Post
-		if err := rows.Scan(&post.Id, &post.Author, &post.Caption, &post.Likes, &post.Comments, &post.TimeOfCreation, &post.IsLiked); err != nil {
+		if err := rows.Scan(&post.Id, &post.AuthorId, &post.Caption, &post.Likes, &post.Comments, &post.TimeOfCreation, &post.Author, &post.IsLiked); err != nil {
 			return result, err
 		}
 		result.Stream = append(result.Stream, post)
