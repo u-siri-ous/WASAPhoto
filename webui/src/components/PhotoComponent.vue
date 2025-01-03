@@ -1,5 +1,5 @@
 <template>
-    <div class="container mt-5" v-if="notBanned">
+    <div class="container mt-5" v-if="notBlocked">
         <div class="center-container">
             <div class="card photo-card p-4 w-75">
                 <img :src="imgSrc" alt="Photo" class="card-img-top" />
@@ -79,7 +79,7 @@ export default {
             authorId: this.authorName,
             isMe: false,
             imgSrc: null,
-            notBanned: true,
+            notBlocked: true,
             Liked: this.isLiked,
             LikeCount: this.likes,
             CommentCount: this.comments,
@@ -105,7 +105,7 @@ export default {
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
-                    this.notBanned = false;
+                    this.notBlocked = false;
                     switch (statusCode) {
                         case 401:
                             console.error('Unauthorized:', error.response.data);
