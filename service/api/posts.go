@@ -368,7 +368,7 @@ func (rt *_router) GetPostPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	isUserBlocked, checkErrors := rt.db.CheckBlock(posterUserId, ctx.Uid)
+	isUserBlocked, checkErrors := rt.db.CheckBlock(ctx.Uid, posterUserId)
 
 	if checkErrors != nil {
 		utility.LogWithError("GetPostPhoto: error while checking if the requested user is blocked - CheckBlock", http.StatusInternalServerError, checkErrors, w, ctx)
