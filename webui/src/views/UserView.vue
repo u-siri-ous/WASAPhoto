@@ -11,7 +11,7 @@
                     </svg>
                 </button>
                 <button @click="toggleBlock" class="btn col block-btn">
-                    {{ isBanned ? 'Unban' : 'Ban' }}
+                    {{ isBlocked ? 'Unban' : 'Ban' }}
                     <svg class="icon">
                         <use href="/feather-sprite-v4.29.0.svg#slash" />
                     </svg>
@@ -43,11 +43,14 @@
             />
         </div>
     </div>
+    <UserList :users="UserList" :postId="token" :typeOfList="TypeOfList" />
 </template>
 
 
 <script>
 import PostCard from '../components/PostCard.vue';
+import UserList from '../components/UserList.vue';
+
 const token = sessionStorage.getItem('authToken');
 
 export default {
@@ -66,11 +69,13 @@ export default {
             followCount: 0,
             followedCount: 0,
             photoCount: 0,
-            isBanned: false,
+            isBlocked: false,
             isFollowed: false,
             isItMe: false,
             photoList: [],
             reloadFlag: true,
+            UserList: {},
+            TypeOfList: '',
         };
     },
     watch: {
@@ -105,7 +110,7 @@ export default {
                 this.followCount = getUserResponse.data.numberOfFollowers;
                 this.followedCount = getUserResponse.data.accountsFollowed;
                 this.photoCount = getUserResponse.data.numberOfPosts;
-                this.isBanned = getUserResponse.data.isBlocked;
+                this.isBlocked = getUserResponse.data.isBlocked;
                 this.isFollowed = getUserResponse.data.isFollowed;
 
                 const getStreamResponse = await this.$axios.get(`/users/${userId}/stream`, {
@@ -150,9 +155,7 @@ export default {
             }
         },
         async toggleFollow() {
-            // frontend
             this.isFollowed = !this.isFollowed;
-            // backend
             const userId = this.$route.params.userId;
             const token = sessionStorage.getItem('authToken');
             try {
@@ -178,13 +181,11 @@ export default {
 
         },
         async toggleBlock() {
-            // frontend
-            this.isBanned = !this.isBanned;
-            // backend
+            this.isBlocked = !this.isBlocked;
             const userId = this.$route.params.userId;
             const token = sessionStorage.getItem('authToken');
             try {
-                if (this.isBanned) {
+                if (this.isBlocked) {
                     await this.$axios.put(`/blocked/${userId}`, {
                     }, {
                         headers: {
@@ -203,9 +204,24 @@ export default {
                 console.error(error, "Error during the block operation.")
             }
         },
+        async viewLikes(photoId) {
+            try {
+                const response = await this.$axios.get(`/posts/${photoId}/likes/self`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const users = response.data.users !== null ? response.data.users : [];
+                this.UserList = users;
+                this.TypeOfList = 'Likes';
+            } catch (error) {
+                console.error(error, "Error while showing the likes.")
+            }
+        }
     },
     components: {
         PostCard,
+        UserList,
     },
 };
 </script>
