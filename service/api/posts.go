@@ -66,7 +66,7 @@ func (rt *_router) CreatePost(w http.ResponseWriter, r *http.Request, ps httprou
 
 	post := structs.Post{
 		Id:             postId,
-		Author:         ctx.Uid,
+		AuthorId:       ctx.Uid,
 		Caption:        photoCaption,
 		Likes:          0,
 		Comments:       0,
@@ -368,7 +368,7 @@ func (rt *_router) GetPostPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	isUserBlocked, checkErrors := rt.db.CheckBlock(posterUserId, ctx.Uid)
+	isUserBlocked, checkErrors := rt.db.CheckBlock(ctx.Uid, posterUserId)
 
 	if checkErrors != nil {
 		utility.LogWithError("GetPostPhoto: error while checking if the requested user is blocked - CheckBlock", http.StatusInternalServerError, checkErrors, w, ctx)

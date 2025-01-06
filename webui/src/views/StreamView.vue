@@ -3,7 +3,7 @@
         <h2>Stream</h2>
         <div class="photo-grid">
             <PhotoComponent v-for="photo in photoList" :key="photo.photoId" :photoId="photo.photoId"
-                :date="photo.timeOfCreation" :authorName="photo.author" :likes="photo.numberOfLikes"
+                :date="photo.timeOfCreation" :authorName="photo.author" :authorId="photo.authorId" :likes="photo.numberOfLikes"
                 :comments="photo.numberOfComments" :caption="photo.caption" :isLiked="photo.isliked" />
         </div>
     </div>

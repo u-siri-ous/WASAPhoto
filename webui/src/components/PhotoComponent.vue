@@ -68,6 +68,7 @@ export default {
     props: {
         photoId: Number,
         authorName: String,
+        authorId: Number,
         caption: String,
         date: Number,
         likes: Number,
@@ -76,7 +77,8 @@ export default {
     },
     data() {
         return {
-            authorId: this.authorName,
+            authorId: this.authorId,
+            authorName: this.authorName,
             isMe: false,
             imgSrc: null,
             notBlocked: true,

@@ -4,7 +4,8 @@ import "time"
 
 type Post struct {
 	Id             uint64    `json:"photoId"`
-	Author         uint64    `json:"author"`
+	Author         string    `json:"author"`
+	AuthorId       uint64    `json:"authorId"`
 	Caption        string    `json:"caption"`
 	Likes          uint64    `json:"numberOfLikes"`
 	Comments       uint64    `json:"numberOfComments"`
