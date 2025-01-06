@@ -4,7 +4,7 @@
         
         <div v-if="found" class="user-actions">
             <div class="action-buttons">
-                <button v-if="!isItMe" @click="toggleFollow" class="btn col follow-btn">
+                <button v-if="!isItMe && !isBlocked" @click="toggleFollow" class="btn col follow-btn">
                     {{ isFollowed ? 'Unfollow' : 'Follow' }}
                     <svg class="icon">
                         <use href="/feather-sprite-v4.29.0.svg#user-plus" />
@@ -193,6 +193,8 @@ export default {
             const token = sessionStorage.getItem('authToken');
             try {
                 if (this.isBlocked) {
+                    this.followCount -= 1;
+                    this.isFollowed = false;
                     await this.$axios.put(`/blocked/${userId}`, {
                     }, {
                         headers: {
@@ -205,7 +207,6 @@ export default {
                             Authorization: `Bearer ${token}`
                         }
                     });
-
                 }
             } catch (error) {
                 console.error(error, "Error during the block operation.")
