@@ -1,7 +1,6 @@
 <template>
     <div class="profile-container">
         <h1 class="profile-username">{{ userName }}</h1>
-        
         <div v-if="found" class="user-actions">
             <div class="action-buttons">
                 <button v-if="!isItMe && !isBlocked" @click="toggleFollow" class="btn col follow-btn">
@@ -193,7 +192,7 @@ export default {
             const token = sessionStorage.getItem('authToken');
             try {
                 if (this.isBlocked) {
-                    this.followCount -= 1;
+                    this.followCount -= this.isFollowed ? 1 : 0;
                     this.isFollowed = false;
                     await this.$axios.put(`/blocked/${userId}`, {
                     }, {

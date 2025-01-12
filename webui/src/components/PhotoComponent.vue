@@ -4,7 +4,7 @@
             <div class="card photo-card p-4 w-75">
                 <img :src="imgSrc" alt="Photo" class="card-img-top" />
                 <div class="card-body photo-details">
-                    <div class="author">{{ authorName }}, {{ formattedDate }}</div>
+                    <div class="author">{{ userName }}, {{ formattedDate }}</div>
                     <div class="card-text text-center bg-light fs-5">{{ caption }}</div>
                     <div class="actions">
                         <button @click="likePhoto" class="btn btn-sm btn-outline-primary">
@@ -22,14 +22,16 @@
                         </button>
                     </div>
                     <div class="comments">
-                        <div v-if="showComments" v-for="comment in photoComments" :key="comment.commentId">
-                            <CommentLine
-                                :photoId="photoId"
-                                :commentId="comment.commentId"
-                                :authorUsername="comment.authorUsername"
-                                :commentText="comment.text"
-                                :authorId="comment.userId"
-                            />
+                        <div v-if="showComments" >
+                            <div v-for="comment in photoComments" :key="comment.commentId">
+                                <CommentLine
+                                    :photoId="photoId"
+                                    :commentId="comment.commentId"
+                                    :authorUsername="comment.authorUsername"
+                                    :commentText="comment.text"
+                                    :authorId="comment.userId"
+                                />
+                            </div>
                         </div>
                         <div class="comment-input">
                             <input
@@ -77,8 +79,8 @@ export default {
     },
     data() {
         return {
-            authorId: this.authorId,
-            authorName: this.authorName,
+            author: this.authorId,
+            userName: this.authorName,
             isMe: false,
             imgSrc: null,
             notBlocked: true,
@@ -95,7 +97,7 @@ export default {
 
         if (this.photoId) {
             try {
-                const response = await this.$axios.get(`/posts/${this.photoId}/photo/${this.authorId}`, {
+                const response = await this.$axios.get(`/posts/${this.photoId}/photo/${this.author}`, {
                   headers: {
                     Authorization: `Bearer ${token}`,
                   },
