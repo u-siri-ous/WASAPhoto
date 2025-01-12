@@ -1,8 +1,8 @@
 <template>
     <div :class="['comment-line', { 'hover-enabled': this.isMe }]">
         <div class="comment w-100">
-            <div class="comment-author font-weight-bold">{{ this.authorUsername }}</div>
-            <div class="comment-text">{{ this.commentText }}</div>
+            <div class="comment-author font-weight-bold">{{ this.username }}</div>
+            <div class="comment-text">{{ this.text }}</div>
         </div>
         <button @click="deleteComment" class="btn btn-danger delete-button h-100" :class="{ 'invisible': !this.isMe }">
             <svg class="feather">
@@ -26,23 +26,23 @@ export default {
     },
     data() {
         return {
-            photoId: this.photoId,
-            commentId: this.commentId,
-            authorUsername: this.authorUsername,
-            authorId: this.authorId,
-            commentText: this.commentText,
+            postId: this.photoId,
+            id: this.commentId,
+            username: this.authorUsername,
+            author: this.authorId,
+            text: this.commentText,
             isMe: false,
         };
     },
     async mounted() {
-        if (this.authorId == token) {
+        if (this.author == token) {
             this.isMe = true;
         }
     },
     methods: {
         async deleteComment() {
             try {
-                await this.$axios.delete(`/posts/${this.photoId}/comments/${this.commentId}`, {
+                await this.$axios.delete(`/posts/${this.postId}/comments/${this.id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     }

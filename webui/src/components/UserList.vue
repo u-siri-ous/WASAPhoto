@@ -9,7 +9,9 @@
                 <div class="modal-body">
                     <ul class="user-list">
                         <li v-for="user in users" :key="user.userId" class="user-item">
-                            <span>{{ user.username }}</span>
+                            <RouterLink :to="'/users/' + user.userId" class="nav-link">
+                                <span>{{ user.username }}</span>
+                            </RouterLink>
                         </li>
                     </ul>
                 </div>
@@ -20,11 +22,16 @@
 </template>
 
 <script>
+import { RouterLink } from 'vue-router';
+
 export default {
     props: {
         users: Array,
         postId: Number,
         typeOfList: String,
+    },
+    components: {
+        RouterLink,
     },
 };
 </script>
