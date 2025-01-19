@@ -200,12 +200,14 @@ export default {
                             Authorization: `Bearer ${token}`
                         }
                     });
+                    this.fetchUserData();
                 } else {
                     await this.$axios.delete(`/blocked/${userId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     });
+                    this.fetchUserData();
                 }
             } catch (error) {
                 console.error(error, "Error during the block operation.")
