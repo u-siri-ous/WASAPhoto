@@ -48,8 +48,8 @@
                         </div>
                     </div>
                 </div>
-                <button v-if="isMe" @click="deletePhoto" class="btn btn-danger delete-button mb-2">
-                    Delete Post <svg class="feather">
+                <button v-if="isMe" @click="deletePhoto" class="btn btn-danger text-black mb-2">
+                    Delete Post <svg class="feather text-black">
                         <use href="/feather-sprite-v4.29.0.svg#trash" />
                     </svg>
                 </button>
