@@ -327,7 +327,7 @@ export default {
 
 .block-btn {
     background-color: #dc3545;
-    color: #fff;
+    color: #333;
 }
 
 .block-btn:hover {
