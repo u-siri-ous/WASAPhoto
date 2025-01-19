@@ -95,6 +95,30 @@ func (rt *_router) GetStream(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
+	isRequesterBlocked, checkErrors := rt.db.CheckBlock(ctx.Uid, userToGetStream)
+
+	if checkErrors != nil {
+		utility.LogWithError("GetStream: error while checking if the requester user is blocked - CheckBlock", http.StatusInternalServerError, checkErrors, w, ctx)
+		return
+	}
+
+	if isRequesterBlocked {
+		utility.LogWithField("GetStream: the requester user is blocked!", http.StatusNotFound, "userId", ctx.Uid, w, ctx)
+		return
+	}
+
+	isRequestedBlocked, checkErrors := rt.db.CheckBlock(userToGetStream, ctx.Uid)
+
+	if checkErrors != nil {
+		utility.LogWithError("GetStream: error while checking if the requested user is blocked - CheckBlock", http.StatusInternalServerError, checkErrors, w, ctx)
+		return
+	}
+
+	if isRequestedBlocked {
+		utility.LogWithField("GetStream: the requested user is blocked!", http.StatusNoContent, "userId", userToGetStream, w, ctx)
+		return
+	}
+
 	followedParam := r.URL.Query().Get("followed")
 	var followedMode bool
 	if followedParam == "" {

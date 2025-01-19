@@ -200,12 +200,14 @@ export default {
                             Authorization: `Bearer ${token}`
                         }
                     });
+                    this.fetchUserData();
                 } else {
                     await this.$axios.delete(`/blocked/${userId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     });
+                    this.fetchUserData();
                 }
             } catch (error) {
                 console.error(error, "Error during the block operation.")
@@ -327,7 +329,7 @@ export default {
 
 .block-btn {
     background-color: #dc3545;
-    color: #fff;
+    color: #333;
 }
 
 .block-btn:hover {
