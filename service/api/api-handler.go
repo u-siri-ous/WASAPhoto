@@ -28,12 +28,15 @@ func (rt *_router) Handler() http.Handler {
 	// Post
 	rt.router.POST("/posts/", rt.wrap(rt.CreatePost, true))
 	rt.router.DELETE("/posts/:postId", rt.wrap(rt.DeletePost, true))
+	// Likes
 	rt.router.GET("/posts/:postId/likes/self", rt.wrap(rt.Likes, true))
 	rt.router.POST("/posts/:postId/likes/self", rt.wrap(rt.LikePost, true))
 	rt.router.DELETE("/posts/:postId/likes/self", rt.wrap(rt.UnlikePost, true))
+	// Comments
 	rt.router.GET("/posts/:postId/comments/", rt.wrap(rt.Comments, true))
 	rt.router.POST("/posts/:postId/comments/", rt.wrap(rt.CommentPost, true))
 	rt.router.DELETE("/posts/:postId/comments/:commentId", rt.wrap(rt.DeleteCommentPost, true))
+	// GetPhoto 
 	rt.router.GET("/posts/:postId/photo/:userId", rt.wrap(rt.GetPostPhoto, true))
 
 	// Liveness check

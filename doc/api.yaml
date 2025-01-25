@@ -312,6 +312,28 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
+  /posts/{postId}/photo/{userId}:
+    parameters:
+      - $ref: "#/components/parameters/PostId"
+      - $ref: "#/components/parameters/UserId"
+
+    get:
+      tags: ["post"]
+      operationId: getPhoto
+      summary: Get the photo of the post.
+      description: |-
+        Get the photo of the post.
+      responses:
+        "200":
+          description: Returns the photo of the post.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Photo" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
   /blocked/{userId}:
     parameters:
       - $ref: "#/components/parameters/UserId"

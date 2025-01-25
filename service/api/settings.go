@@ -27,7 +27,7 @@ func (rt *_router) SetUsername(w http.ResponseWriter, r *http.Request, ps httpro
 
 	isUsernameTaken, checkUsernameAvailabilityErrors := rt.db.CheckUsernameAvailability(request.Username)
 
-	if requestErrors != nil {
+	if checkUsernameAvailabilityErrors != nil {
 		utility.LogWithError("SetUsername: error while checking the availability of the username - CheckUsernameAvailability", http.StatusInternalServerError, checkUsernameAvailabilityErrors, w, ctx)
 		return
 	}

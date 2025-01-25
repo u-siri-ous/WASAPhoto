@@ -6,6 +6,6 @@ const (
 	UploadedPhotoFolder = "/photos"
 	AllowedMimeType     = "image/jpeg"
 
-	MaxRequestFileSize = 12 << 20
-	MaxFileSize        = 10 << 20
+	MaxRequestFileSize = 12 << 20  // 12 MB
+	MaxFileSize        = 10 << 20  // 10 MB
 )
